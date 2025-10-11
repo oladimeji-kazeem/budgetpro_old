@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found - Leadway Pension{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="logo-circle">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Page Not Found</h2>
+        <p class="subtitle">The page you're looking for doesn't exist</p>
+
+        <div class="alert alert-warning" style="border-radius: 8px;">
+            The page you requested could not be found. Please check the URL or return to the home page.
+        </div>
+        
+        <a href="{% url 'home' %}" class="btn btn-primary">Go to Home</a>
+    </div>
+</div>
+{% endblock %}
