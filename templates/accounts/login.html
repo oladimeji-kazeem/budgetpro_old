@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Sign In - Leadway Pension{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
         <div class="logo-circle">
-            <i class="fas fa-building"></i>
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
         </div>
         <h2>Leadway Pension</h2>
         <p class="subtitle">Enterprise Budgeting & Performance Management</p>
