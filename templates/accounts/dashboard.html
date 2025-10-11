@@ -114,6 +114,7 @@
     .icon-orange { color: #fd7e14; }
     .icon-clipboard { color: #17a2b8; }
     .icon-chart { color: #007bff; }
+    .icon-settings { color: #6c757d; } /* New color for Setup */
 
     /* Fix to override base.html background */
     .auth-container {
@@ -185,6 +186,19 @@
                 </div>
                 <button class="btn btn-module-access disabled" disabled>Access Module</button>
             </div>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'setup_index' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-cogs icon-settings"></i>
+                        <h4>Setup</h4>
+                        <p>Manage all core configuration and master data records</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
+                </div>
+            </a>
         </div>
 
         <div class="col-md-4">

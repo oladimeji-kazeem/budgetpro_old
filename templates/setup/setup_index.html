@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Setup Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa; 
+        color: #343a40;
+    }
+    .setup-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .setup-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+    }
+    .setup-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .setup-card h5 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .setup-card p {
+        color: #6c757d;
+        font-size: 14px;
+    }
+    .btn-setup-access {
+        background-color: var(--teal-accent);
+        color: var(--white);
+        border: none;
+    }
+    .btn-setup-access:hover {
+        background-color: #318a84;
+        color: var(--white);
+    }
+    /* Simple Navbar for consistency, inheriting from dashboard styles */
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 10px 0;
+    }
+    .navbar-dashboard .navbar-brand {
+        color: var(--primary-dark) !important;
+        font-weight: 700;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .navbar-dashboard .navbar-brand img {
+        height: 30px;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Setup Management</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container setup-container">
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">Setup & Configuration Tables</h1>
+    <p class="mb-5" style="color: #6c757d;">Select a table below to perform CRUD operations.</p>
+
+    <div class="row g-4">
+        {% for model in setup_models %}
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">{{ model.name }}</h5>
+                <p>{{ model.description }}</p>
+                <a href="{{ model.url_list }}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'setup/setup_base.html' %}
+
+{% block setup_title %}
+    Delete {{ model_verbose_name }}
+{% endblock %}
+
+{% block setup_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="setup-card">
+            <p>Are you sure you want to delete the following {{ model_verbose_name }} record?</p>
+            <h4 class="text-danger">{{ object }}</h4>
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger mt-3 me-2">
+                    <i class="fas fa-trash-alt"></i> Confirm Delete
+                </button>
+                <a href="{% url 'setup:'|add:model_name_singular|add:'_list' %}" class="btn btn-secondary mt-3">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

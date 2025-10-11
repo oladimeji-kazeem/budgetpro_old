@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 # Add to INSTALLED_APPS
+# Add to INSTALLED_APPS
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',  # Add this
+    'setup',     # Add this new app
     'crispy_forms',  # Add this
     'crispy_bootstrap4',  # Add this
 ]

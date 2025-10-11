@@ -1,0 +1,26 @@
+{% extends 'setup/setup_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block setup_title %}
+    {% if object %}
+        Edit {{ model_verbose_name }}
+    {% else %}
+        Create New {{ model_verbose_name }}
+    {% endif %}
+{% endblock %}
+
+{% block setup_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="setup-card">
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+            </form>
+        </div>
+        <a href="{% url 'setup:'|add:model_name_singular|add:'_list' %}" class="btn btn-secondary mt-3">
+            <i class="fas fa-list"></i> Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}

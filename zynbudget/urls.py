@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),  # Add this line
+    path('', include('accounts.urls')),
+    path('setup/', include('setup.urls', namespace='setup')), # FIX: Added namespace='setup'
 ]
 
 # Add this for serving media files in development

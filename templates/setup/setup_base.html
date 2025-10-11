@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+{% load crispy_forms_tags %}
+<style>
+    body {
+        background: #f8f9fa; 
+        color: #343a40;
+    }
+    .setup-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .setup-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 10px 0;
+    }
+    .navbar-dashboard .navbar-brand {
+        color: var(--primary-dark) !important;
+        font-weight: 700;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .navbar-dashboard .navbar-brand img {
+        height: 30px;
+        margin-right: 10px;
+    }
+    .action-links a {
+        color: var(--teal-accent);
+        margin-left: 10px;
+    }
+    .action-links a:hover {
+        color: var(--secondary-dark);
+    }
+    .table thead {
+        background-color: #f1f1f1;
+        color: var(--primary-dark);
+    }
+    .table {
+        background: var(--white);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Setup Management</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'setup:setup_index' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Setup Index
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container setup-container">
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">
+        {% block setup_title %}Setup Management{% endblock %}
+    </h1>
+    {% block setup_content %}{% endblock %}
+</div>
+{% endblock %}
