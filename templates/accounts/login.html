@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Sign In - Leadway Pension{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="logo-circle">
+            <i class="fas fa-building"></i>
+        </div>
+        <h2>Leadway Pension</h2>
+        <p class="subtitle">Enterprise Budgeting & Performance Management</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_username" class="form-label">Email</label>
+                <input type="text" 
+                       name="username" 
+                       class="form-control" 
+                       id="id_username"
+                       placeholder="you@leadwaypension.com"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_password" class="form-label">Password</label>
+                <input type="password" 
+                       name="password" 
+                       class="form-control" 
+                       id="id_password"
+                       placeholder="••••••••"
+                       required>
+            </div>
+
+            <button type="submit" class="btn btn-primary mb-3">Sign In</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}" class="auth-link">Forgot Password?</a>
+        </div>
+        
+        <div class="text-center mt-3" style="color: #6c757d;">
+            Need an account? <a href="{% url 'signup' %}" class="auth-link">Sign up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
