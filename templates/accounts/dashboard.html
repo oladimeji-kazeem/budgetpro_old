@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Leadway Pension{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        /* Change background for dashboard view to a solid light color */
+        background: #f8f9fa; 
+        color: #343a40;
+        min-height: 100vh;
+    }
+    .dashboard-container {
+        padding-top: 80px; /* Space for the fixed navbar */
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 10px 0;
+    }
+    .navbar-dashboard .navbar-brand {
+        color: var(--primary-dark) !important;
+        font-weight: 700;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+    }
+    .navbar-dashboard .navbar-brand img {
+        height: 30px;
+        margin-right: 10px;
+    }
+    .navbar-dashboard .navbar-text {
+        color: var(--primary-dark);
+        font-weight: 500;
+        margin-right: 15px;
+    }
+    .navbar-dashboard .user-info {
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+    }
+    .navbar-dashboard .user-avatar {
+        width: 30px;
+        height: 30px;
+        background: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: var(--primary-dark);
+        margin-left: 10px;
+    }
+    .logout-link {
+        color: var(--primary-dark);
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .logout-link:hover {
+        background-color: #f1f1f1;
+    }
+    .module-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .module-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .module-card i {
+        font-size: 36px;
+        margin-bottom: 15px;
+    }
+    .module-card h4 {
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 5px;
+    }
+    .module-card p {
+        color: #6c757d;
+        font-size: 14px;
+        flex-grow: 1;
+    }
+    .btn-module-access {
+        width: 100%;
+        border-radius: 6px;
+        background-color: #e9ecef;
+        color: #495057;
+        border: none;
+        padding: 10px;
+        font-weight: 600;
+    }
+    .btn-module-access:hover {
+        background-color: #dee2e6;
+        color: #343a40;
+    }
+    
+    /* Icon Colors based on the image */
+    .icon-green { color: #28a745; }
+    .icon-upload { color: var(--teal-accent); }
+    .icon-orange { color: #fd7e14; }
+    .icon-clipboard { color: #17a2b8; }
+    .icon-chart { color: #007bff; }
+
+    /* Fix to override base.html background */
+    .auth-container {
+        min-height: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Budgeting & Performance System</span>
+        </a>
+        
+        <div class="user-info">
+            <span class="navbar-text d-none d-sm-inline">
+                {{ user.full_name|default:user.username }}
+            </span>
+            <span class="navbar-text d-none d-sm-inline" style="font-size: 12px; color: #6c757d; margin-right: 15px;">
+                {{ user.email }}
+            </span>
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="logout-link" style="background: none; border: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container dashboard-container">
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">Welcome to your Dashboard</h1>
+    <p class="mb-5" style="color: #6c757d;">Select a module below to manage your budgeting and performance data</p>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="module-card">
+                <div>
+                    <i class="fas fa-database icon-green"></i>
+                    <h4>Historical Data</h4>
+                    <p>Upload and manage historical financial data</p>
+                </div>
+                <button class="btn btn-module-access disabled" disabled>Access Module</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="module-card">
+                <div>
+                    <i class="fas fa-cloud-upload-alt icon-upload"></i>
+                    <h4>Budget Inputs</h4>
+                    <p>Submit departmental budget requests</p>
+                </div>
+                <button class="btn btn-module-access disabled" disabled>Access Module</button>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="module-card">
+                <div>
+                    <i class="fas fa-chart-pie icon-orange"></i>
+                    <h4>AUM Management</h4>
+                    <p>Assets Under Management tracking</p>
+                </div>
+                <button class="btn btn-module-access disabled" disabled>Access Module</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="module-card">
+                <div>
+                    <i class="fas fa-chart-line icon-chart"></i>
+                    <h4>Forecast</h4>
+                    <p>AI-powered financial forecasting</p>
+                </div>
+                <button class="btn btn-module-access disabled" disabled>Access Module</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="module-card">
+                <div>
+                    <i class="fas fa-chart-bar icon-clipboard"></i>
+                    <h4>Analysis</h4>
+                    <p>Performance analysis and reporting</p>
+                </div>
+                <button class="btn btn-module-access disabled" disabled>Access Module</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

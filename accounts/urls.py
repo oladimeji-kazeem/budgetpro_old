@@ -8,9 +8,14 @@ from django.contrib.auth.views import (
 from . import views
 
 urlpatterns = [
+    # Public Home (Root URL)
     path('', views.home_view, name='home'),
+    # Protected Dashboard
+    path('dashboard/', views.dashboard_view, name='dashboard'), # Added dashboard path
+
     path('login/', views.CustomLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    # Logout will redirect to LOGIN_REDIRECT_URL (login)
+    path('logout/', LogoutView.as_view(), name='logout'), 
     path('signup/', views.signup_view, name='signup'),
     path('password-change/', views.CustomPasswordChangeView.as_view(), name='password_change'),
     path('password-reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),

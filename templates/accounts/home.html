@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Home - Leadway Pension{% endblock %}
+{% block title %}Welcome - Leadway Pension{% endblock %}
 
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
@@ -11,30 +11,25 @@
             Leadway Pension
         </a>
         <div class="d-flex align-items-center">
-            <span class="text-white me-3">Welcome, {{ user.full_name|default:user.username }}!</span>
-            <a href="{% url 'password_change' %}" class="btn btn-outline-light me-2">Change Password</a>
-            <form method="post" action="{% url 'logout' %}" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
+            <a href="{% url 'login' %}" class="btn btn-outline-light">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
         </div>
     </div>
 </nav>
 
 <div class="hero-section">
     <div class="container">
-        <div class="logo-circle mx-auto mb-4" style="width: 120px; height: 120px;">
-            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
+        <div class="logo-circle mx-auto mb-4" style="width: 120px; height: 120px; background: var(--teal-accent);">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <h1>Leadway Pension</h1>
-        <p class="subtitle" style="font-size: 24px; color: var(--text-light); margin-bottom: 16px;">Enterprise Budgeting & Performance Management</p>
-        <p style="color: var(--text-light); max-width: 800px; margin: 0 auto 40px;">Comprehensive solution for budgeting, forecasting, and financial analysis.<br>
-           Empowering data-driven decision making across your organization.</p>
+        <h1>Enterprise Budgeting & Performance</h1>
+        <p class="subtitle" style="font-size: 24px; color: var(--text-light); margin-bottom: 16px;">The unified platform for financial excellence.</p>
+        <p style="color: var(--text-light); max-width: 800px; margin: 0 auto 40px;">Seamlessly manage budgets, forecast performance with AI, and track assets under management. <br>
+           Secure and efficient for data-driven decisions.</p>
         
-        <button class="btn btn-primary" style="background: var(--white); color: var(--primary-dark); margin-right: 16px; width: auto; padding: 14px 40px;">Get Started</button>
-        <button class="btn btn-outline-light">Learn More</button>
+        <a href="{% url 'signup' %}" class="btn btn-primary" style="background: var(--white); color: var(--primary-dark); margin-right: 16px; width: auto; padding: 14px 40px;">Create Account</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-light">Sign In</a>
     </div>
 </div>
 

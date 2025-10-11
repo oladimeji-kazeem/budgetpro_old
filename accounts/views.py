@@ -14,7 +14,7 @@ class CustomLoginView(LoginView):
 
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'accounts/password_change.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('dashboard') # Changed from 'home' to 'dashboard'
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'accounts/password_reset.html'
@@ -23,19 +23,28 @@ class CustomPasswordResetView(PasswordResetView):
 
 def signup_view(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('dashboard') # Changed redirect from 'home' to 'dashboard'
     
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')
+            return redirect('dashboard') # Changed redirect from 'home' to 'dashboard'
     else:
         form = CustomUserCreationForm()
     
     return render(request, 'accounts/signup.html', {'form': form})
 
-@login_required
+# New public view for the root URL
 def home_view(request):
-    return render(request, 'accounts/home.html')
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    # This renders the public landing page (home.html)
+    return render(request, 'accounts/home.html') 
+
+# New protected view for the dashboard
+@login_required
+def dashboard_view(request):
+    # This renders the authenticated dashboard page (dashboard.html)
+    return render(request, 'accounts/dashboard.html')
