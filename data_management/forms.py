@@ -3,6 +3,13 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit
 from setup.models import GLTransaction # Import GLTransaction model
 
+REPORTING_PERIOD_CHOICES = [
+    ('annual', 'Annual (Yearly)'),
+    ('half_yearly', 'Half-Yearly'),
+    ('quarterly', 'Quarterly'),
+    ('monthly', 'Monthly'),
+]
+
 class IncomeStatementFilterForm(forms.Form):
     # Retrieve dynamic choices from GLTransaction table
     def __init__(self, *args, **kwargs):
@@ -12,19 +19,20 @@ class IncomeStatementFilterForm(forms.Form):
         self.helper.form_class = 'bg-white p-4 rounded shadow-sm mb-4'
         self.helper.layout = Layout(
             Row(
-                Column('start_date', css_class='form-group col-md-3 mb-0'),
-                Column('end_date', css_class='form-group col-md-3 mb-0'),
-                Column('entity', css_class='form-group col-md-3 mb-0'),
-                Column('cost_center', css_class='form-group col-md-3 mb-0'),
+                Column('start_date', css_class='form-group col-md-2 mb-0'), # Reduced column size
+                Column('end_date', css_class='form-group col-md-2 mb-0'), # Reduced column size
+                Column('reporting_period', css_class='form-group col-md-2 mb-0'), # NEW FIELD
+                Column('entity', css_class='form-group col-md-2 mb-0'),
+                Column('cost_center', css_class='form-group col-md-2 mb-0'),
+                Column('journal_type', css_class='form-group col-md-2 mb-0'),
                 css_class='form-row'
             ),
             Row(
-                Column('journal_type', css_class='form-group col-md-3 mb-0'),
                 Column('project', css_class='form-group col-md-3 mb-0'),
                 Column('currency', css_class='form-group col-md-3 mb-0'),
                 Column(
                     Submit('filter', 'Apply Filters', css_class='btn-primary mt-4 w-100'),
-                    css_class='form-group col-md-3 mb-0'
+                    css_class='form-group col-md-6 mb-0'
                 ),
                 css_class='form-row mt-3'
             )
@@ -40,6 +48,14 @@ class IncomeStatementFilterForm(forms.Form):
         required=False,
         label='End Date',
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    
+    # NEW PERIOD FIELD
+    reporting_period = forms.ChoiceField(
+        required=False,
+        choices=REPORTING_PERIOD_CHOICES,
+        label='Reporting Period',
+        initial='annual'
     )
 
     # Helper function to get distinct choices (must handle cases where GLTransaction is empty)
