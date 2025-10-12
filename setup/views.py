@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
-from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail
-from .forms import RSAFundForm, StateForm, LocationForm, RegionForm, ManagedFundForm, DateDetailForm
+# FIX 1: Added GLAccount to model imports
+from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail, GLAccount 
+# FIX 2: Added GLAccountForm to form imports
+from .forms import RSAFundForm, StateForm, LocationForm, RegionForm, ManagedFundForm, DateDetailForm, GLAccountForm
 
 # --- Setup Index View ---
 @login_required
@@ -13,7 +15,7 @@ def setup_index(request):
     Renders the setup index page which links to the CRUD pages.
     """
     setup_models = [
-        # FIX: Updated reverse calls to use the 'setup' namespace
+        {'name': 'GL Accounts', 'description': 'Manage all General Ledger chart of accounts (COA) records.', 'url_list': reverse('setup:glaccount_list'), 'icon': 'fas fa-book', 'color': '#800080'},
         {'name': 'RSA Funds', 'description': 'Manage PENCOM RSA Funds.', 'url_list': reverse('setup:rsafund_list'), 'icon': 'fas fa-shield-alt', 'color': '#28a745'},
         {'name': 'States', 'description': 'Manage Nigerian States.', 'url_list': reverse('setup:state_list'), 'icon': 'fas fa-globe-africa', 'color': '#17a2b8'},
         {'name': 'Locations', 'description': 'Manage Locations within States.', 'url_list': reverse('setup:location_list'), 'icon': 'fas fa-map-marker-alt', 'color': '#fd7e14'},
@@ -32,7 +34,6 @@ class BaseSetupView(LoginRequiredMixin):
     # Success URL is determined by the specific model's list view name
     def get_success_url(self):
         model_name = self.model.__name__.lower()
-        # FIX: Updated reverse_lazy call to use the 'setup' namespace
         return reverse_lazy(f'setup:{model_name}_list')
     
     def get_context_data(self, **kwargs):
@@ -62,11 +63,6 @@ class RSAFundDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- State CRUD Views ---
-# oladimeji-kazeem/budgetpro/budgetpro-965d2f1c88eeae849be92683e0569a8a9270f653/setup/views.py (Relevant Snippet)
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-# Assuming BaseSetupView and imports for State and StateForm are present
-
-# --- State CRUD Views ---
 class StateListView(BaseSetupView, ListView):
     model = State
     template_name = 'setup/state_list.html'
@@ -87,11 +83,10 @@ class StateDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
     
 # --- Location CRUD Views (Pattern Repeats) ---
-# --- Location CRUD Views ---
 class LocationListView(BaseSetupView, ListView):
     model = Location
     template_name = 'setup/location_list.html'
-    context_object_name = 'locations' # Used in location_list.html to iterate over list
+    context_object_name = 'locations'
 
 class LocationCreateView(BaseSetupView, CreateView):
     model = Location
@@ -108,11 +103,10 @@ class LocationDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- Region CRUD Views (Pattern Repeats) ---
-# --- Region CRUD Views ---
 class RegionListView(BaseSetupView, ListView):
     model = Region
     template_name = 'setup/region_list.html'
-    context_object_name = 'regions' # Used in region_list.html to iterate over list
+    context_object_name = 'regions'
 
 class RegionCreateView(BaseSetupView, CreateView):
     model = Region
@@ -129,7 +123,6 @@ class RegionDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- ManagedFund CRUD Views (Pattern Repeats) ---
-# --- ManagedFund CRUD Views ---
 class ManagedFundListView(BaseSetupView, ListView):
     model = ManagedFund
     template_name = 'setup/managed_fund_list.html'
@@ -147,6 +140,26 @@ class ManagedFundUpdateView(BaseSetupView, UpdateView):
 
 class ManagedFundDeleteView(BaseSetupView, DeleteView):
     model = ManagedFund
+    template_name = 'setup/setup_confirm_delete.html'
+
+# --- GL Account CRUD Views ---
+class GLAccountListView(BaseSetupView, ListView):
+    model = GLAccount
+    template_name = 'setup/gl_account_list.html'
+    context_object_name = 'gl_accounts'
+
+class GLAccountCreateView(BaseSetupView, CreateView):
+    model = GLAccount
+    form_class = GLAccountForm
+    template_name = 'setup/setup_form.html'
+
+class GLAccountUpdateView(BaseSetupView, UpdateView):
+    model = GLAccount
+    form_class = GLAccountForm
+    template_name = 'setup/setup_form.html'
+
+class GLAccountDeleteView(BaseSetupView, DeleteView):
+    model = GLAccount
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- DateDetail CRUD Views (Pattern Repeats) ---

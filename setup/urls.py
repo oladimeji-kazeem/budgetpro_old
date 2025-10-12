@@ -43,4 +43,11 @@ urlpatterns = [
     path('datedetail/new/', views.DateDetailCreateView.as_view(), name='date_detail_create'),
     path('datedetail/<int:pk>/edit/', views.DateDetailUpdateView.as_view(), name='date_detail_update'),
     path('datedetail/<int:pk>/delete/', views.DateDetailDeleteView.as_view(), name='date_detail_delete'),
+
+    # GL Account URLs
+    path('glaccount/', views.GLAccountListView.as_view(), name='glaccount_list'),
+    path('glaccount/new/', views.GLAccountCreateView.as_view(), name='glaccount_create'),
+    path('glaccount/<int:pk>/edit/', views.GLAccountUpdateView.as_view(), name='glaccount_update'),
+    path('glaccount/<int:pk>/delete/', views.GLAccountDeleteView.as_view(), name='glaccount_delete'),
+
 ]

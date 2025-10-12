@@ -86,17 +86,76 @@
     <p class="mb-5" style="color: #6c757d;">Select a table below to perform CRUD operations.</p>
 
     <div class="row g-4">
-        {% for model in setup_models %}
         <div class="col-md-4">
             <div class="setup-card d-flex flex-column h-100">
-                <h5 class="flex-grow-1">{{ model.name }}</h5>
-                <p>{{ model.description }}</p>
-                <a href="{{ model.url_list }}" class="btn btn-sm btn-setup-access mt-2">
+                <h5 class="flex-grow-1">GL Accounts</h5>
+                <p>Manage all General Ledger chart of accounts (COA) records.</p>
+                <a href="{% url 'setup:glaccount_list' %}" class="btn btn-sm btn-setup-access mt-2">
                     Manage Records <i class="fas fa-list ms-2"></i>
                 </a>
             </div>
         </div>
-        {% endfor %}
+        
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">RSA Funds</h5>
+                <p>Manage PENCOM RSA Funds.</p>
+                <a href="{% url 'setup:rsafund_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">States</h5>
+                <p>Manage Nigerian States.</p>
+                <a href="{% url 'setup:state_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">Locations</h5>
+                <p>Manage Locations within States.</p>
+                <a href="{% url 'setup:location_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">Regions</h5>
+                <p>Manage Logical Regions.</p>
+                <a href="{% url 'setup:region_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">Managed Funds</h5>
+                <p>Manage Special Managed Funds.</p>
+                <a href="{% url 'setup:managedfund_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="setup-card d-flex flex-column h-100">
+                <h5 class="flex-grow-1">Date Table</h5>
+                <p>Manage Date Details (Month, Quarter, Year).</p>
+                <a href="{% url 'setup:date_detail_list' %}" class="btn btn-sm btn-setup-access mt-2">
+                    Manage Records <i class="fas fa-list ms-2"></i>
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

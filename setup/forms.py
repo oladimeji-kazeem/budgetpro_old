@@ -1,7 +1,8 @@
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
-from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail
+# FIX: Added GLAccount to the import list
+from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail, GLAccount 
 
 class BaseSetupForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -76,3 +77,23 @@ class DateDetailForm(BaseSetupForm):
             Submit('submit', 'Save Date Detail', css_class='btn-primary mt-3')
         )
         self.helper.form_method = 'post'
+
+
+# ... (existing imports and other forms)
+
+# 7. GLAccount Forms
+class GLAccountForm(BaseSetupForm):
+    class Meta:
+        model = GLAccount # This line now finds the model
+        fields = [
+            'gl_account_code', 'gl_account_name', 'category', 'sub_category',
+            'financial_statement', 'account_type', 'is_postable', 
+            'parent_account', 'normal_balance', 'active_flag'
+        ]
+        widgets = {
+            'gl_account_code': forms.TextInput(attrs={'placeholder': 'e.g., GL100001'}),
+            'gl_account_name': forms.TextInput(attrs={'placeholder': 'e.g., Management Fees Income'}),
+            'category': forms.TextInput(attrs={'placeholder': 'e.g., Revenue'}),
+            'sub_category': forms.TextInput(attrs={'placeholder': 'e.g., Operating Income'}),
+            'account_type': forms.TextInput(attrs={'placeholder': 'e.g., Account or Header'}),
+        }
