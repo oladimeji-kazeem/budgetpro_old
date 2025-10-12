@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}Income Statement - {{ period }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    /* === Performance Card Styling === */
+    .performance-card-container {
+        /* Reverted to standard card layout */
+        margin-bottom: 30px;
+    }
+    .performance-card {
+        /* Styles applied to individual cards */
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Lighter shadow for cleaner look */
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .card-title-small {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    .card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 5px;
+    }
+    .card-footer-small {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+    
+    /* === Filter Form Styling for horizontal flow === */
+    .filter-form-container {
+        margin-bottom: 30px;
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    /* Targets the inner rows of the crispy form layout */
+    .filter-form-container .row {
+        margin-bottom: 10px;
+    }
+    .filter-form-container .form-label {
+        font-weight: 600;
+        color: #495057; /* Slightly darker text for contrast */
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+    /* Ensure date inputs are properly sized */
+    .filter-form-container input[type="date"],
+    .filter-form-container select {
+        height: calc(1.5em + 0.75rem + 2px); /* Standard input height */
+    }
+    .filter-form-container .btn-primary {
+        background: var(--primary-dark);
+        border: none;
+        width: 100%;
+    }
+
+    /* === Remaining Styles === */
+    .table-financial {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+    }
+    .table-financial th, .table-financial td {
+        padding: 12px 15px;
+    }
+    .amount-cell {
+        text-align: right;
+    }
+    
+    /* Print Styles */
+    @media print {
+        body {
+            background-color: #fff !important;
+        }
+        .navbar, .report-actions, .filter-form-container {
+            display: none !important;
+        }
+        .report-container {
+            padding-top: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Income Statement</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'data_management:historical_data' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Data Management
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <div class="d-flex justify-content-between align-items-center mb-4 report-actions">
+        <div>
+            <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">Income Statement</h1>
+            <p class="mb-0 text-muted">For the Period Ended: {{ period }}</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button id="printButton" class="btn btn-outline-secondary">
+                <i class="fas fa-print me-1"></i> Print Report
+            </button>
+            <a href="{% url 'data_management:export_income_statement_excel' %}" class="btn btn-outline-success">
+                <i class="fas fa-file-excel me-1"></i> Export to Excel
+            </a>
+        </div>
+    </div>
+    
+    <div class="filter-form-container">
+        {% crispy filter_form %}
+    </div>
+
+    {% if applied_filters %}
+        <div class="alert alert-info py-2" role="alert">
+            <small class="fw-bold me-2">Filters Applied:</small>
+            {% for key, value in applied_filters.items %}
+                <span class="badge bg-secondary me-2">{{ key }}: {{ value }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row g-4 performance-card-container">
+        {% for card in performance_cards %}
+        <div class="col-md-3">
+            <div class="performance-card">
+                <p class="card-title-small">{{ card.title }}</p>
+                <div class="card-value">{{ card.value }}</div>
+                <div class="card-footer-small text-{{ card.color }}">
+                    <i class="{{ card.icon }} me-1"></i> {{ card.change }} vs. {{ previous_period }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card p-0 table-financial">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Description</th>
+                        <th class="amount-cell">{{ period }}</th>
+                        <th class="amount-cell text-muted">{{ previous_period }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in financial_data %}
+                        {% if item.type == 'header' %}
+                            <tr class="header-row">
+                                <td colspan="3">{{ item.description }}</td>
+                            </tr>
+                        {% elif item.type == 'subtotal' %}
+                            <tr class="subtotal-row">
+                                <td>{{ item.description }}</td>
+                                <td class="amount-cell border-top border-dark border-1">{{ item.current|intcomma }}</td>
+                                <td class="amount-cell text-muted border-top border-dark border-1">{{ item.previous|intcomma }}</td>
+                            </tr>
+                        {% elif item.type == 'major_total' %}
+                            <tr class="major-total-row">
+                                <td>{{ item.description }}</td>
+                                <td class="amount-cell">{{ item.current|intcomma }}</td>
+                                <td class="amount-cell text-white-50">{{ item.previous|intcomma }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="account-row">{{ item.description }}</td>
+                                <td class="amount-cell">{{ item.current|intcomma }}</td>
+                                <td class="amount-cell text-muted">{{ item.previous|intcomma }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('printButton').addEventListener('click', function() {
+        window.print();
+    });
+</script>
+{% endblock %}

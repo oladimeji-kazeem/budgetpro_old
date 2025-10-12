@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',  # Add this
-    'setup',     # Add this new app
-    'crispy_forms',  # Add this
-    'crispy_bootstrap4',  # Add this
+    'django.contrib.humanize', # FIX: Added humanize for intcomma filter
+    'accounts',
+    'setup',
+    'data_management', 
+    'crispy_forms',
+    'crispy_bootstrap4',
 ]
 
 MIDDLEWARE = [

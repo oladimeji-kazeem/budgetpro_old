@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('setup/', include('setup.urls', namespace='setup')), # FIX: Added namespace='setup'
+    path('data/', include('data_management.urls', namespace='data_management')), # ADDED new data module
 ]
 
 # Add this for serving media files in development

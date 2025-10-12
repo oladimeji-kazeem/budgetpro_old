@@ -156,14 +156,16 @@
 
     <div class="row g-4">
         <div class="col-md-4">
-            <div class="module-card">
-                <div>
-                    <i class="fas fa-database icon-green"></i>
-                    <h4>Historical Data</h4>
-                    <p>Upload and manage historical financial data</p>
+            <a href="{% url 'data_management:historical_data' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-database icon-green"></i>
+                        <h4>Historical Data</h4>
+                        <p>Upload and manage historical financial data</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
                 </div>
-                <button class="btn btn-module-access disabled" disabled>Access Module</button>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4">
