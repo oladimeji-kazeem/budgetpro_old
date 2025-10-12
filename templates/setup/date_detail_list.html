@@ -1,0 +1,50 @@
+{% extends 'setup/setup_base.html' %}
+
+{% block setup_title %}
+    Date Table Management
+{% endblock %}
+
+{% block setup_content %}
+<div class="d-flex justify-content-between mb-3">
+    <p class="text-muted">List of all dates and their associated financial periods.</p>
+    <a href="{% url 'setup:date_detail_create' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus-circle"></i> Add New Date
+    </a>
+</div>
+
+<div class="setup-card p-0">
+    <table class="table table-striped table-hover mb-0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Quarter</th>
+                <th>Half-Year</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for date_detail in date_details %}
+            <tr>
+                <td>{{ date_detail.pk }}</td>
+                <td>{{ date_detail.date|date:"Y-m-d" }}</td>
+                <td>{{ date_detail.year }}</td>
+                <td>{{ date_detail.month }}</td>
+                <td>Q{{ date_detail.quarter }}</td>
+                <td>H{{ date_detail.half_year }}</td>
+                <td class="text-end action-links">
+                    <a href="{% url 'setup:date_detail_update' date_detail.pk %}" title="Edit"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'setup:date_detail_delete' date_detail.pk %}" class="text-danger" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">No Date Details found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

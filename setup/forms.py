@@ -69,7 +69,7 @@ class DateDetailForm(BaseSetupForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Custom helper layout for DateDetail (optional, just to show how to customize)
+        # Custom helper layout for DateDetail
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'date',

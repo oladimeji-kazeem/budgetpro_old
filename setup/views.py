@@ -62,6 +62,11 @@ class RSAFundDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- State CRUD Views ---
+# oladimeji-kazeem/budgetpro/budgetpro-965d2f1c88eeae849be92683e0569a8a9270f653/setup/views.py (Relevant Snippet)
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+# Assuming BaseSetupView and imports for State and StateForm are present
+
+# --- State CRUD Views ---
 class StateListView(BaseSetupView, ListView):
     model = State
     template_name = 'setup/state_list.html'
@@ -82,10 +87,11 @@ class StateDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
     
 # --- Location CRUD Views (Pattern Repeats) ---
+# --- Location CRUD Views ---
 class LocationListView(BaseSetupView, ListView):
     model = Location
     template_name = 'setup/location_list.html'
-    context_object_name = 'locations'
+    context_object_name = 'locations' # Used in location_list.html to iterate over list
 
 class LocationCreateView(BaseSetupView, CreateView):
     model = Location
@@ -102,10 +108,11 @@ class LocationDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- Region CRUD Views (Pattern Repeats) ---
+# --- Region CRUD Views ---
 class RegionListView(BaseSetupView, ListView):
     model = Region
     template_name = 'setup/region_list.html'
-    context_object_name = 'regions'
+    context_object_name = 'regions' # Used in region_list.html to iterate over list
 
 class RegionCreateView(BaseSetupView, CreateView):
     model = Region
@@ -122,6 +129,7 @@ class RegionDeleteView(BaseSetupView, DeleteView):
     template_name = 'setup/setup_confirm_delete.html'
 
 # --- ManagedFund CRUD Views (Pattern Repeats) ---
+# --- ManagedFund CRUD Views ---
 class ManagedFundListView(BaseSetupView, ListView):
     model = ManagedFund
     template_name = 'setup/managed_fund_list.html'

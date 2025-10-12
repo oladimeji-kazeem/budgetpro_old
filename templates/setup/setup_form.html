@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block setup_content %}
+{% with list_url_name="setup:"|add:model_name_singular|add:"_list" %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="setup-card">
@@ -18,9 +19,10 @@
                 {{ form|crispy }}
             </form>
         </div>
-        <a href="{% url 'setup:'|add:model_name_singular|add:'_list' %}" class="btn btn-secondary mt-3">
+        <a href="{% url list_url_name %}" class="btn btn-secondary mt-3">
             <i class="fas fa-list"></i> Back to List
         </a>
     </div>
 </div>
+{% endwith %}
 {% endblock %}

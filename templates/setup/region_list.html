@@ -1,0 +1,60 @@
+{% extends 'setup/setup_base.html' %}
+
+{% block setup_title %}
+    Region Management
+{% endblock %}
+
+{% block setup_content %}
+<div class="d-flex justify-content-between mb-3">
+    <p class="text-muted">List of all configured logical Regions.</p>
+    <a href="{% url 'setup:region_create' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus-circle"></i> Add New Region
+    </a>
+</div>
+
+<div class="setup-card p-0">
+    <table class="table table-striped table-hover mb-0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Region Name</th>
+                <th>States Linked</th>
+                <th>Locations Linked</th>
+                <th>Date Created</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for region in regions %}
+            <tr>
+                <td>{{ region.pk }}</td>
+                <td>{{ region.name }}</td>
+                <td>
+                    {% for state in region.states.all %}
+                        <span class="badge bg-secondary me-1">{{ state.name }}</span>
+                    {% empty %}
+                        <span class="text-muted fst-italic">None</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for location in region.locations.all %}
+                        <span class="badge bg-info text-dark me-1">{{ location.name }}</span>
+                    {% empty %}
+                        <span class="text-muted fst-italic">None</span>
+                    {% endfor %}
+                </td>
+                <td>{{ region.created_at|date:"Y-m-d" }}</td>
+                <td class="text-end action-links">
+                    <a href="{% url 'setup:region_update' region.pk %}" title="Edit"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'setup:region_delete' region.pk %}" class="text-danger" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">No Regions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
