@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse 
 from .models import UploadHistory
@@ -7,6 +7,11 @@ from .forms import IncomeStatementFilterForm
 import io 
 from openpyxl import Workbook 
 from django.utils.formats import number_format 
+from django.shortcuts import render
+# FIX: Import FundTransaction model
+from setup.models import GLTransaction, FundTransaction
+from .forms import IncomeStatementFilterForm, HistoricalDataUploadForm # ADDED HistoricalDataUploadForm
+
 
 
 # Helper function to generate mock periods for headers
@@ -20,23 +25,43 @@ def generate_mock_periods(period_type):
     else: # annual
         return ['Current Period', 'Previous Period']
 
-
 @login_required
 def historical_data_view(request):
-    # This view will handle the data import logic (POST request) 
-    # and render the UI (GET request).
     
-    # 1. Fetch Upload History
     upload_history = UploadHistory.objects.filter(uploaded_by=request.user).order_by('-upload_date')[:10]
+    recent_gl_transactions = GLTransaction.objects.all().order_by('-created_at')[:5]
+    recent_fund_transactions = FundTransaction.objects.all().order_by('-created_at')[:5]
     
-    # 2. Fetch Sample Recent Transactions (Example: Last 5 transactions)
-    recent_transactions = GLTransaction.objects.all().order_by('-created_at')[:5]
+    if request.method == 'POST':
+        upload_form = HistoricalDataUploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            uploaded_file = upload_form.cleaned_data['excel_file']
+            upload_type = upload_form.cleaned_data['upload_type']
+            
+            # --- Simulation of Import Logic ---
+            # In a real app, this is where you'd call a parser function
+            # that routes data based on upload_type (e.g., to GLTransaction, FundTransaction tables)
+            
+            # Simulate logging success
+            UploadHistory.objects.create(
+                file_name=uploaded_file.name,
+                uploaded_by=request.user,
+                record_count=100, # Mock count
+                status=f'Success: Routed to {upload_type} table'
+            )
+            # End Simulation ---
+
+            # Redirect after POST to prevent resubmission
+            return redirect('data_management:historical_data') 
+    else:
+        upload_form = HistoricalDataUploadForm()
+
 
     context = {
         'upload_history': upload_history,
-        'recent_transactions': recent_transactions,
-        # Placeholder for form/logic that handles file upload
-        'file_upload_form': None 
+        'recent_gl_transactions': recent_gl_transactions, 
+        'recent_fund_transactions': recent_fund_transactions, 
+        'upload_form': upload_form, # Pass the form to the template
     }
     return render(request, 'data_management/historical_data.html', context)
 
@@ -68,6 +93,22 @@ def download_excel_template(request, template_type):
         'date_table': {
             'filename': 'Date_Detail_Template.xlsx',
             'headers': ['date (YYYY-MM-DD)']
+        },
+        # NEW: RSA Fund Template
+        'rsa_fund': {
+            'filename': 'RSA_Fund_Historical_Template.xlsx',
+            'headers': [
+                'transaction_date (YYYY-MM-DD)', 'rsa_fund_name', 'entity_code', 
+                'contributions', 'withdrawals', 'balance'
+            ]
+        },
+        # NEW: Managed Fund Template
+        'managed_fund': {
+            'filename': 'Managed_Fund_Historical_Template.xlsx',
+            'headers': [
+                'transaction_date (YYYY-MM-DD)', 'managed_fund_name', 'entity_code', 
+                'investment_value', 'contributions', 'withdrawals'
+            ]
         },
     }
 
@@ -473,3 +514,140 @@ def export_cash_flow_excel(request):
     response['Content-Disposition'] = f'attachment; filename=Cash_Flow_Statement_{reporting_period.capitalize()}.xlsx'
     
     return response
+
+# Mock data structure to simulate CSV content
+MOCK_MANAGED_FUND_DATA = {
+    'GUINNESS': {
+        'AUM Closing Balance': 913523.56,
+        'Contribution': 26122.28,
+        'Payout': 9509.10,
+        'Returns': 33838.47,
+    },
+    'CBN RETIREE': {
+        'AUM Closing Balance': 26362188.82,
+        'Contribution': 0,
+        'Payout': 577931.51,
+        'Returns': 1153444.67,
+    },
+    'NNPC': {
+        'AUM Closing Balance': 51308240.58,
+        'Contribution': 208245.94,
+        'Payout': 0,
+        'Returns': 2027588.83,
+    }
+}
+MOCK_RSA_FUND_DATA = {
+    'RSA Fund 1': {
+        'AUM Closing Balance': 9553729.43,
+        'Total PINs': 1149,
+        'Active PINs': 837,
+        'Avg Contribution (New)': 1162.34,
+    },
+    'RSA Fund 2': {
+        'AUM Closing Balance': 571982124.79,
+        'Total PINs': 520147,
+        'Active PINs': 187929,
+        'Avg Contribution (New)': 8.92,
+    }
+}
+
+@login_required
+def managed_fund_view(request):
+    filter_form = IncomeStatementFilterForm(request.GET)
+    
+    # Mock periods based on CSV (Q4 2024 is the latest actual data point)
+    period_labels = ['Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024']
+    
+    # Mock Performance Cards
+    performance_cards = [
+        {'title': 'Total AUM (Latest)', 'value': '₦83.9M', 'change': '+5%', 'trend': 'up', 'icon': 'fas fa-chart-pie', 'color': 'success'},
+        {'title': 'Total Contributions', 'value': '₦250k', 'change': '+12%', 'trend': 'up', 'icon': 'fas fa-plus', 'color': 'primary'},
+        {'title': 'Avg Quarterly Return', 'value': '1.5%', 'change': '-0.1%', 'trend': 'down', 'icon': 'fas fa-percentage', 'color': 'warning'},
+    ]
+    
+    # Adapt mock data for table display
+    financial_data = []
+    
+    for fund_name, metrics in MOCK_MANAGED_FUND_DATA.items():
+        # AUM Closing Balance
+        financial_data.append({
+            'description': f"AUM Closing Balance - {fund_name}",
+            'periods': {period: metrics['AUM Closing Balance'] + (i * 1000) for i, period in enumerate(period_labels)},
+            'type': 'account',
+            'is_major': False
+        })
+        # Contribution
+        financial_data.append({
+            'description': f"Contribution - {fund_name}",
+            'periods': {period: metrics['Contribution'] + (i * 100) for i, period in enumerate(period_labels)},
+            'type': 'account',
+            'is_major': False
+        })
+
+    context = {
+        'filter_form': filter_form,
+        'performance_cards': performance_cards,
+        'financial_data': financial_data,
+        'period_labels': period_labels,
+        'report_type': 'Managed Fund Historical Data',
+        'period_prefix': 'Quarterly Breakdown:',
+    }
+    return render(request, 'data_management/managed_fund_report.html', context)
+
+
+@login_required
+def rsa_fund_view(request):
+    filter_form = IncomeStatementFilterForm(request.GET)
+    
+    # Mock periods based on CSV (Q4 2024 is the latest actual data point)
+    period_labels = ['Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024']
+    
+    # Mock Performance Cards
+    performance_cards = [
+        {'title': 'Total RSA AUM', 'value': '₦600B', 'change': '+12%', 'trend': 'up', 'icon': 'fas fa-shield-alt', 'color': 'info'},
+        {'title': 'Total PIN Count', 'value': '645K', 'change': '+3%', 'trend': 'up', 'icon': 'fas fa-users', 'color': 'primary'},
+        {'title': 'Avg Contrib. (New)', 'value': '₦550', 'change': '-10%', 'trend': 'down', 'icon': 'fas fa-arrow-down', 'color': 'danger'},
+    ]
+    
+    # Adapt mock data for table display
+    financial_data = []
+    
+    for fund_name, metrics in MOCK_RSA_FUND_DATA.items():
+        # AUM
+        financial_data.append({
+            'description': f"AUM Closing Balance - {fund_name}",
+            'periods': {period: metrics['AUM Closing Balance'] + (i * 500000) for i, period in enumerate(period_labels)},
+            'type': 'header',
+            'is_major': False
+        })
+        # Total PINs
+        financial_data.append({
+            'description': f"Total PINs - {fund_name}",
+            'periods': {period: metrics['Total PINs'] + (i * 100) for i, period in enumerate(period_labels)},
+            'type': 'account',
+            'is_major': False
+        })
+        # Active PINs
+        financial_data.append({
+            'description': f"Active PINs - {fund_name}",
+            'periods': {period: metrics['Active PINs'] + (i * 50) for i, period in enumerate(period_labels)},
+            'type': 'account',
+            'is_major': False
+        })
+        # Avg Contribution
+        financial_data.append({
+            'description': f"Avg Contribution (New) - {fund_name}",
+            'periods': {period: metrics['Avg Contribution (New)'] + (i * 5) for i, period in enumerate(period_labels)},
+            'type': 'account',
+            'is_major': False
+        })
+
+    context = {
+        'filter_form': filter_form,
+        'performance_cards': performance_cards,
+        'financial_data': financial_data,
+        'period_labels': period_labels,
+        'report_type': 'RSA Fund Historical Data',
+        'period_prefix': 'Quarterly Breakdown:',
+    }
+    return render(request, 'data_management/rsa_fund_report.html', context)

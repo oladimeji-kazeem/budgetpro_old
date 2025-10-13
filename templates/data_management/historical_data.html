@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
 
 {% block title %}Historical Data Management{% endblock %}
 
@@ -133,25 +135,20 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
-                    <div class="mb-4">
-                        <label for="excel_file" class="form-label fw-bold">Select Excel File</label>
-                        <input type="file" name="excel_file" class="form-control" id="excel_file" accept=".xls,.xlsx" required>
-                    </div>
-
+                    {% if upload_form %}
+                        {% crispy upload_form %}
+                    {% else %}
+                        <div class="alert alert-danger">Error initializing upload form.</div>
+                    {% endif %}
                     <div class="mb-4 p-3 bg-light rounded">
-                        <label class="form-label fw-bold">Expected Data:</label>
+                        <label class="form-label fw-bold">Expected Data (Select Above):</label>
                         <ul class="expected-data-list">
-                            <li>GL Transactions records</li>
-                            <li>Account Ledgers</li>
-                            <li>Contributions Ledger</li>
-                            <li>Fund Ledgers</li>
-
+                            <li>GL Transactions / Income Statement / Balance Sheet (Mapped to GL Transactions table)</li>
+                            <li>RSA Fund Historical records (Mapped to Fund Transactions table)</li>
+                            <li>Managed Fund Historical data (Mapped to Fund Transactions table)</li>
+                            <li>GL Accounts / Date Table (Setup tables)</li>
                         </ul>
                     </div>
-
-                    <button type="submit" class="btn btn-success w-100">
-                        <i class="fas fa-upload me-2"></i> Process & Upload Data
-                    </button>
                 </form>
             </div>
         </div>
@@ -176,22 +173,24 @@
                         <span><i class="fas fa-file-excel text-success me-2"></i> Date Table Template</span>
                         <i class="fas fa-download text-muted"></i>
                     </a>
-                </div>
+                    <a href="{% url 'data_management:download_template' template_type='managed_fund' %}" class="excel-template-link">
+                        <span><i class="fas fa-file-excel text-success me-2"></i> Managed Fund Template</span>
+                        <i class="fas fa-download text-muted"></i>
+                    </a>
+                    <a href="{% url 'data_management:download_template' template_type='rsa_fund' %}" class="excel-template-link">
+                        <span><i class="fas fa-file-excel text-success me-2"></i> RSA Fund Template</span>
+                        <i class="fas fa-download text-muted"></i>
+                    </a>
+                    </div>
 
                 <h6 class="text-muted fw-bold mb-3">Financial Statements & Fund Data Pages</h6>
                 <div class="list-group list-group-flush">
                     <a href="{% url 'data_management:income_statement' %}" class="template-link">Income Statement Page</a>
                     <a href="{% url 'data_management:balance_sheet' %}" class="template-link">Balance Sheet Page</a>
                     <a href="{% url 'data_management:cash_flow' %}" class="template-link">Cashflow Page</a>
-                    
+                    <a href="{% url 'data_management:managed_fund_report' %}" class="template-link">Managed Fund Page</a>
+                    <a href="{% url 'data_management:rsa_fund_report' %}" class="template-link">RSA Fund Page</a>
                 </div>
-            </div>
-        </div>
-            </div>
-        </div>
-
-            </div>
-        </div>
             </div>
         </div>
     </div>
@@ -240,7 +239,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for trx in recent_transactions %}
+                        {% for trx in recent_gl_transactions %}
                         <tr>
                             <td>{{ trx.transaction_date|date:"Y-m-d" }}</td>
                             <td>{{ trx.gl_account_code.gl_account_code }}</td>
@@ -250,13 +249,45 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center text-muted">No sample transactions found in the database.</td>
+                            <td colspan="5" class="text-center text-muted">No sample GL transactions found in the database.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        {% else %}
+            
+            <h6 class="mt-4 mb-3">Sample of Uploaded Fund Transactions</h6>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr class="table-secondary">
+                            <th>Date</th>
+                            <th>Fund Name</th>
+                            <th>Source</th>
+                            <th>Contributions</th>
+                            <th>Withdrawals</th>
+                            <th>Balance/Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trx in recent_fund_transactions %}
+                        <tr>
+                            <td>{{ trx.transaction_date|date:"Y-m-d" }}</td>
+                            <td>{{ trx.managed_fund.name|default:trx.rsa_fund.name }}</td>
+                            <td><span class="badge bg-info">{{ trx.source_type }}</span></td>
+                            <td>{{ trx.contributions|intcomma }}</td>
+                            <td>{{ trx.withdrawals|intcomma }}</td>
+                            <td>{{ trx.balance|default:trx.investment_value|default:"0.00"|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No sample fund transactions found in the database.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
             <div class="empty-state">
                 <i class="fas fa-file-upload"></i>
                 <p>No historical data uploaded yet. Upload your first Excel file to get started</p>

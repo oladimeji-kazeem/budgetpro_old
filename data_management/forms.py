@@ -96,3 +96,34 @@ class IncomeStatementFilterForm(forms.Form):
         choices=get_choices('currency_code', 'All Currencies'),
         label='Currency',
     )
+
+UPLOAD_TYPE_CHOICES = [
+    ('', '--- Select Data Type ---'),
+    ('gl_transactions', 'GL Transactions Data'),
+    ('gl_accounts', 'GL Accounts (COA)'),
+    ('date_table', 'Date Table'),
+    ('rsa_fund', 'RSA Fund Historical'),
+    ('managed_fund', 'Managed Fund Historical'),
+]
+
+class HistoricalDataUploadForm(forms.Form):
+    upload_type = forms.ChoiceField(
+        choices=UPLOAD_TYPE_CHOICES,
+        label='Data to Import',
+        required=True
+    )
+    excel_file = forms.FileField(
+        label='Select Excel/CSV File',
+        required=True,
+        widget=forms.FileInput(attrs={'accept': '.xls,.xlsx,.csv'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            'upload_type',
+            'excel_file',
+            Submit('submit', 'Process & Upload Data', css_class='btn-success w-100 mt-4')
+        )

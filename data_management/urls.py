@@ -13,4 +13,6 @@ urlpatterns = [
     # ADDED New Cash Flow URLs
     path('cash_flow/', views.cash_flow_view, name='cash_flow'),
     path('export/cash_flow/', views.export_cash_flow_excel, name='export_cash_flow_excel'),
+    path('managed_fund_report/', views.managed_fund_view, name='managed_fund_report'),
+    path('rsa_fund_report/', views.rsa_fund_view, name='rsa_fund_report'),
 ]
