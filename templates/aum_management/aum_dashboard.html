@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load aum_filters %} 
+
+{% block title %}AUM Management Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .aum-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    /* Global Card Style */
+    .app-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+    }
+
+    /* Form Card Styling */
+    .form-card {
+        padding: 0; /* Crispy form will manage inner padding */
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .form-card .form-group {
+        margin-bottom: 15px !important;
+    }
+    .form-card .btn-primary {
+        background: var(--primary-dark) !important;
+        border: none !important;
+    }
+    .form-card .btn-primary:hover {
+        background: var(--secondary-dark) !important;
+    }
+    
+    /* KPI Card Styling */
+    .aum-kpi-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+    .kpi-title {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    .kpi-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+    
+    /* Comparison Table Styling */
+    .comparison-table {
+        background: var(--white);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+    .comparison-table thead th {
+        background-color: #f1f1f1;
+        color: var(--primary-dark);
+        font-weight: 600;
+    }
+    
+    /* Links Panel Styling */
+    .links-panel {
+        padding: 20px;
+        height: 100%;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+    }
+    .links-panel a {
+        display: block;
+        padding: 8px 0; /* Adjusted padding */
+        border-bottom: 1px dashed #eee;
+        color: var(--teal-accent);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    .links-panel a:hover {
+        color: var(--primary-dark);
+    }
+    .links-panel a:last-child {
+        border-bottom: none;
+    }
+    
+    /* Custom Styling for Tab Content */
+    .tab-content .fieldset {
+        padding: 10px 10px 5px 10px; /* Reduced padding inside tabbed fieldset */
+        border: none;
+    }
+
+    /* Trend Modal Styling */
+    .trend-detail-card {
+        background: var(--white);
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .trend-header {
+        border-bottom: 2px solid var(--teal-accent);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        color: var(--primary-dark);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| AUM Management</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container aum-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">AUM Calculation & Tracking</h1>
+    <p class="mb-4 text-muted">Use the PFA AUM Growth Model and key drivers to project and analyze fund performance.</p>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-9">
+            <div class="app-card form-card">
+                 <h4 class="mb-3 fw-bold" style="color: var(--primary-dark);">AUM Driver Inputs</h4>
+                 <p class="text-muted small mb-4">Enter historical or forecast data based on Managed Fund or RSA drivers.</p>
+                {% crispy form %}
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="app-card links-panel">
+                <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">Assumption Drivers</h5>
+                
+                <a href="#"><i class="fas fa-cog me-2"></i> Managed Fund Assumptions <i class="fas fa-file-alt float-end"></i></a>
+                <a href="#"><i class="fas fa-cog me-2"></i> RSA Fund Assumptions <i class="fas fa-file-alt float-end"></i></a>
+                <a href="#"><i class="fas fa-cog me-2"></i> Total PINs Assumptions <i class="fas fa-file-alt float-end"></i></a>
+                <a href="#"><i class="fas fa-cog me-2"></i> Agency Assumptions <i class="fas fa-file-alt float-end"></i></a>
+                <a href="#"><i class="fas fa-cog me-2"></i> Income Statement <i class="fas fa-file-alt float-end"></i></a>
+                <a href="#"><i class="fas fa-cog me-2"></i> Balance Sheet <i class="fas fa-file-alt float-end"></i></a>
+            </div>
+        </div>
+    </div>
+    {% if results %}
+        <h3 class="mt-4 mb-3" style="color: var(--primary-dark);">Calculation Summary for {{ results.fund_name }}</h3>
+        
+        <div class="row g-4 mb-5">
+            {% for kpi in aum_kpis %}
+            <div class="col-md-3">
+                <div class="aum-kpi-card">
+                    <p class="kpi-title text-{{ kpi.color }}">{{ kpi.title }}</p>
+                    <div class="kpi-value">
+                        {% if kpi.value_key == 'aum_growth_percent' or kpi.value_key == 'net_flow_percent' or kpi.value_key == 'return_on_asset_percent' %}
+                            {{ results|get_dict_value:kpi.value_key|default:"0.00"|floatformat:2 }} %
+                        {% else %}
+                            ₦{{ results|get_dict_value:kpi.value_key|default:"0"|intcomma }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row g-4 mb-5">
+            
+            <div class="col-md-6">
+                <div class="app-card">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">PFA AUM Growth Model</h5>
+                    <table class="table table-sm mt-3 mb-0">
+                        <tbody>
+                            <tr><td>**Opening AUM** ({{ results.start_date|date:"M d, Y"|default:"Start" }})</td><td class="text-end fw-bold">₦{{ results.initial_aum|intcomma }}</td></tr>
+                            <tr><td>**+ Contributions**</td><td class="text-end text-success">₦{{ results.contributions|intcomma }}</td></tr>
+                            <tr><td>**- Payouts**</td><td class="text-end text-danger">₦{{ results.payouts|intcomma }}</td></tr>
+                            <tr><td>**+ Investment Return**</td><td class="text-end text-success">₦{{ results.investment_return|intcomma }}</td></tr>
+                            <tr><td>**- Total Fees** (Admin + Asset Mgt + PFA + PFC + PENCOM)</td><td class="text-end text-danger">₦{{ results.total_fees|intcomma }}</td></tr>
+                            <tr class="fw-bold table-light"><td>**= Closing AUM** ({{ results.end_date|date:"M d, Y" }})</td><td class="text-end">₦{{ results.closing_aum|intcomma }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="app-card">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">Detailed Growth & Cost Metrics</h5>
+                    <table class="table table-sm mt-3 mb-0">
+                        <tbody>
+                            <tr><td>Absolute AUM Growth</td><td class="text-end text-success">₦{{ results.aum_growth|intcomma }}</td></tr>
+                            <tr><td>Net Flow (Contributions - Payouts)</td><td class="text-end text-info">₦{{ results.net_flow|intcomma }}</td></tr>
+                            <tr><td>AUM Growth Rate</td><td class="text-end text-success">{{ results.aum_growth_percent|floatformat:2 }}%</td></tr>
+                            <tr><td>Net Flow Rate</td><td class="text-end text-info">{{ results.net_flow_percent|floatformat:2 }}%</td></tr>
+                            <tr><td>ROA Rate (Returns/Initial AUM)</td><td class="text-end text-warning">{{ results.return_on_asset_percent|floatformat:2 }}%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <h3 class="mt-4 mb-3" style="color: var(--primary-dark);">Fund Comparison (Across PFAs/Funds)</h3>
+    <div class="comparison-table shadow-lg">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Fund Name</th>
+                        <th class="text-end">Latest AUM (₦)</th>
+                        <th class="text-end">YOY Growth (%)</th>
+                        <th class="text-end">ROA (%)</th>
+                        <th class="text-center">Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in comparison_data %}
+                    <tr>
+                        <td>{{ item.fund }}</td>
+                        <td class="text-end fw-bold">₦{{ item.aum_latest|intcomma }}</td>
+                        <td class="text-end text-{% if item.yoy_growth > 0 %}success{% else %}danger{% endif %}">{{ item.yoy_growth|floatformat:1 }}%</td>
+                        <td class="text-end text-info">{{ item.roa|floatformat:1 }}%</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="showTrendDetail('{{ item.fund }}')">
+                                View Trend
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="trendDetailSection" class="trend-detail-card" style="display: none;">
+        <h4 class="trend-header">Monthly Trend Detail for <span id="trendFundName" class="text-info"></span></h4>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th class="text-end">AUM (₦)</th>
+                        <th class="text-end">Net Flow (₦)</th>
+                        <th class="text-end">Investment Return (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="trendDataBody">
+                    </tbody>
+            </table>
+            <p class="text-muted small mt-3">This shows the simulated 12-month performance trend.</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mock data for the trend detail view
+    const mockTrendData = {
+        'RSA Fund 1': [
+            {period: 'Oct 24', aum: 550000000, flow: 12000000, roa: 0.6},
+            {period: 'Nov 24', aum: 565000000, flow: 15000000, roa: 0.7},
+            {period: 'Dec 24', aum: 580000000, flow: 15000000, roa: 0.8},
+            {period: 'Jan 25', aum: 600000000, flow: 20000000, roa: 0.9},
+            {period: 'Feb 25', aum: 615000000, flow: 15000000, roa: 0.7},
+            {period: 'Mar 25', aum: 630000000, flow: 15000000, roa: 0.8},
+        ],
+        'CBN RETIREE': [
+            {period: 'Oct 24', aum: 2700000000, flow: 55000000, roa: 0.9},
+            {period: 'Nov 24', aum: 2750000000, flow: 50000000, roa: 0.8},
+            {period: 'Dec 24', aum: 2800000000, flow: 50000000, roa: 0.9},
+            {period: 'Jan 25', aum: 2850000000, flow: 50000000, roa: 1.0},
+            {period: 'Feb 25', aum: 2900000000, flow: 50000000, roa: 0.95},
+            {period: 'Mar 25', aum: 2950000000, flow: 50000000, roa: 1.0},
+        ],
+        // Default data for other funds
+        'default': [
+            {period: 'Oct 24', aum: 1000000000, flow: 10000000, roa: 0.5},
+            {period: 'Nov 24', aum: 1050000000, flow: 20000000, roa: 0.6},
+            {period: 'Dec 24', aum: 1100000000, flow: 15000000, roa: 0.7},
+        ]
+    };
+
+    function formatNaira(num) {
+        if (num === 0 || num === null) return '0.00';
+        // Handle negative numbers for better accounting presentation
+        const isNegative = num < 0;
+        const absNum = Math.abs(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return isNegative ? `(${absNum})` : absNum;
+    }
+
+    function showTrendDetail(fundName) {
+        const detailSection = document.getElementById('trendDetailSection');
+        const fundNameSpan = document.getElementById('trendFundName');
+        const dataBody = document.getElementById('trendDataBody');
+        
+        fundNameSpan.textContent = fundName;
+        dataBody.innerHTML = '';
+        
+        const data = mockTrendData[fundName] || mockTrendData.default;
+
+        data.forEach(item => {
+            const row = dataBody.insertRow();
+            row.insertCell().textContent = item.period;
+            
+            row.insertCell().textContent = '₦' + formatNaira(item.aum);
+            row.cells[1].classList.add('text-end');
+            
+            row.insertCell().textContent = '₦' + formatNaira(item.flow);
+            row.cells[2].classList.add('text-end');
+
+            row.insertCell().textContent = item.roa.toFixed(2) + '%';
+            row.cells[3].classList.add('text-end');
+        });
+
+        detailSection.style.display = 'block';
+        detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Make the mock data available globally if needed for debugging (optional)
+    window.showTrendDetail = showTrendDetail; 
+    
+    // Function to handle automatic end date setting
+    document.addEventListener('DOMContentLoaded', function() {
+        const endDateInput = document.getElementById('id_end_date');
+        if (!endDateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            endDateInput.value = today;
+        }
+    });
+</script>
+{% endblock %}

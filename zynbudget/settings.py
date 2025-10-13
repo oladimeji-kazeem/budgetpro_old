@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'setup',
     'data_management', 
+    'aum_management',
     'crispy_forms',
     'crispy_bootstrap4',
 ]

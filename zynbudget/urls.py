@@ -8,6 +8,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('setup/', include('setup.urls', namespace='setup')), # FIX: Added namespace='setup'
     path('data/', include('data_management.urls', namespace='data_management')), # ADDED new data module
+    path('aum/', include('aum_management.urls', namespace='aum_management')), # ADDED new AUM module
 ]
 
 # Add this for serving media files in development

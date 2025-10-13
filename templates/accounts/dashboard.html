@@ -179,15 +179,17 @@
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="module-card">
-                <div>
-                    <i class="fas fa-chart-pie icon-orange"></i>
-                    <h4>AUM Management</h4>
-                    <p>Assets Under Management tracking</p>
+         <div class="col-md-4">
+            <a href="{% url 'aum_management:aum_dashboard' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-chart-pie icon-orange"></i>
+                        <h4>AUM Management</h4>
+                        <p>Assets Under Management tracking</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
                 </div>
-                <button class="btn btn-module-access disabled" disabled>Access Module</button>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4">
