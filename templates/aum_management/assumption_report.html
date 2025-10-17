@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ report_title }} | Assumptions{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    /* Report Table Styling */
+    .assumption-table-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .assumption-table-card th, .assumption-table-card td {
+        white-space: nowrap; /* Prevent horizontal wrapping */
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    .assumption-table-card thead th {
+        background-color: #f1f1f1;
+        color: var(--primary-dark);
+        font-weight: 600;
+        border-bottom: 2px solid var(--teal-accent);
+    }
+    .section-header-row {
+        font-weight: 800;
+        background-color: #e9ecef;
+        color: var(--primary-dark);
+        font-size: 1.0em;
+    }
+    .amount-cell {
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'aum_management:aum_dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Assumption Drivers</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'aum_management:aum_dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to AUM Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">{{ report_title }}</h1>
+            <p class="mb-0 text-muted">{{ report_type }} Forecasts (Q1 2025 - Q4 2029)</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Print
+            </button>
+            <a href="#" class="btn btn-outline-success disabled">
+                <i class="fas fa-file-excel me-1"></i> Export
+            </a>
+        </div>
+    </div>
+    
+    <div class="assumption-table-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Driver Description</th>
+                        {% for label in period_labels %}
+                            <th class="amount-cell">{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in financial_data %}
+                        {% if item.type == 'section_header' %}
+                            <tr class="section-header-row">
+                                <td colspan="{{ period_labels|length|add:1 }}">{{ item.description }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                {% for label, value in item.periods.items %}
+                                    <td class="amount-cell">{{ value|floatformat:4 }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

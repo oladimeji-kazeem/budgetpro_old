@@ -1,0 +1,53 @@
+{% extends 'aum_management/aum_base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}AUM Drivers{% endblock %}
+
+{% block aum_content %}
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">AUM Drivers Assumptions</h1>
+    <p class="mb-4 text-muted">Set quarterly assumptions for AUM calculations by fund type.</p>
+
+    {% if message %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    <div class="app-card form-card">
+        {% crispy form %}
+    </div>
+
+    <h4 class="mt-5 mb-3 fw-bold" style="color: var(--primary-dark);">Saved Driver Assumptions (Mock Table)</h4>
+    <div class="app-card p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Fund</th>
+                        <th>Year/Quarter</th>
+                        <th>Contribution Gr. (%)</th>
+                        <th>Rate of Return (%)</th>
+                        <th>PFA Fee (%)</th>
+                        <th class="text-end">Calculation Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for driver in mock_saved_drivers %}
+                    <tr>
+                        <td>{{ driver.fund_name }}</td>
+                        <td>{{ driver.year_quarter }}</td>
+                        <td>{{ driver.contribution_growth }}</td>
+                        <td>{{ driver.return_rate }}</td>
+                        <td>{{ driver.pfa_fee }}</td>
+                        <td class="text-end">{{ driver.date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No saved driver assumptions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

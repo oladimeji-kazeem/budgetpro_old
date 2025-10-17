@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .aum-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    /* Tab Navigation Styles */
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    .nav-tabs .nav-link {
+        color: #495057;
+        padding: 10px 15px;
+        font-weight: 500;
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--primary-dark);
+        background-color: var(--white);
+        border-color: #dee2e6 #dee2e6 var(--white) #dee2e6;
+        border-bottom-color: transparent;
+        font-weight: 700;
+    }
+    /* Global Card Style */
+    .app-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+    }
+</style>
+{% block specific_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| AUM Management</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container aum-container">
+    <ul class="nav nav-tabs" id="aumTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'aum_calculation' %}active{% endif %}" href="{% url 'aum_management:aum_calculation' %}" role="tab">AUM Calculation</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'aum_drivers' %}active{% endif %}" href="{% url 'aum_management:aum_drivers' %}" role="tab">AUM Drivers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'rsa_historical' %}active{% endif %}" href="{% url 'aum_management:rsa_historical' %}" role="tab">RSA Historical</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'managed_fund_historical' %}active{% endif %}" href="{% url 'aum_management:managed_fund_historical' %}" role="tab">Managed Fund Historical</a>
+        </li>
+    </ul>
+
+    <div class="tab-content pt-3">
+        {% block aum_content %}{% endblock %}
+    </div>
+
+</div>
+{% endblock %}

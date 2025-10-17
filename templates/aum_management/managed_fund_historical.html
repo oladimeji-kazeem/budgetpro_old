@@ -1,0 +1,53 @@
+{% extends 'aum_management/aum_base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}Managed Fund Historical Data{% endblock %}
+
+{% block aum_content %}
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">Managed Fund Historical Data</h1>
+    <p class="mb-4 text-muted">Enter monthly historical data for managed funds.</p>
+
+    {% if message %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    <div class="app-card form-card">
+        {% crispy form %}
+    </div>
+
+    <h4 class="mt-5 mb-3 fw-bold" style="color: var(--primary-dark);">Recent Managed Fund History</h4>
+    <div class="app-card p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Fund Name</th>
+                        <th>Period End Date</th>
+                        <th>AUM Closing Balance (₦)</th>
+                        <th>Contribution</th>
+                        <th>Payout</th>
+                        <th>Returns</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history in recent_managed_history %}
+                    <tr>
+                        <td>{{ history.managed_fund.name }}</td>
+                        <td>{{ history.period_end_date|date:"Y-m-d" }}</td>
+                        <td class="text-end">₦{{ history.aum_closing_balance|intcomma }}</td>
+                        <td class="text-end">₦{{ history.contribution|intcomma }}</td>
+                        <td class="text-end">₦{{ history.payout|intcomma }}</td>
+                        <td class="text-end">₦{{ history.returns|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No Managed Fund Historical records found in the database.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
