@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ report_type }} Forecast{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 80px; /* Space for fixed footer */
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .table-financial {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+    }
+    .table-financial th, .table-financial td {
+        padding: 12px 15px;
+    }
+    .amount-cell {
+        text-align: right;
+    }
+    .header-row {
+        font-weight: 700;
+        background-color: #f1f1f1;
+        color: var(--primary-dark);
+        border-top: 1px solid #dee2e6;
+    }
+    .major-total-row {
+        font-weight: 700;
+        background-color: var(--teal-accent);
+        color: var(--white);
+        border-top: 3px solid #3fb8af;
+        border-bottom: 3px double #3fb8af;
+    }
+    .forecast-header-tag {
+        color: #dc3545; /* Red for emphasis on 'Tentative' */
+        font-weight: 800;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| {{ report_type }} Forecast</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'budget_input:submission_index' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Budget Input
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">
+        <span class="forecast-header-tag">TENTATIVE </span>{{ report_type }} 
+    </h1>
+    <p class="mb-2 text-muted">
+        Based on **APPROVED** Submissions and Assumptions Version: <strong>{{ assumptions_version }}</strong>
+    </p>
+    <p class="mb-4 text-muted small">For the {{ period }}</p>
+
+    <div class="card p-0 table-financial">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70%;">Description</th>
+                        <th class="amount-cell">Forecast Amount (₦)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in financial_data %}
+                        {% if item.type == 'header' or item.type == 'subtotal' %}
+                            <tr class="header-row">
+                                <td>{{ item.description }}</td>
+                                <td class="amount-cell border-top border-dark border-1">{{ item.current|intcomma }}</td>
+                            </tr>
+                        {% elif item.type == 'major_total' %}
+                            <tr class="major-total-row">
+                                <td>{{ item.description }}</td>
+                                <td class="amount-cell">{{ item.current|intcomma }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td class="amount-cell">{{ item.current|intcomma }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h5 class="fw-bold text-danger">⚠️ Disclaimer:</h5>
+        <p class="mb-0 small text-muted">This statement is tentative and for internal planning purposes only. It is derived from system-approved budget data and current budget assumptions and requires final Executive Approval.</p>
+    </div>
+</div>
+
+<div class="fixed-bottom p-3" style="background-color: var(--white); border-top: 1px solid #e9ecef; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
+    <div class="container d-flex justify-content-center">
+        <a href="{% url 'budget_input:forecast_income_statement' %}" class="btn btn-primary me-2 {% if report_type == 'Income Statement' %}disabled{% endif %}">
+            Income Statement
+        </a>
+        <a href="{% url 'budget_input:forecast_balance_sheet' %}" class="btn btn-primary me-2 {% if report_type == 'Balance Sheet' %}disabled{% endif %}">
+            Balance Sheet
+        </a>
+        <a href="{% url 'budget_input:forecast_cash_flow' %}" class="btn btn-primary {% if report_type == 'Cash Flow' %}disabled{% endif %}">
+            Cash Flow
+        </a>
+    </div>
+</div>
+{% endblock %}

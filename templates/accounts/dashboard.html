@@ -1,3 +1,5 @@
+# oladimeji-kazeem/budgetpro/budgetpro-ab94e7d262d0d24f247fd60a27eb8be6e83a6e36/templates/accounts/dashboard.html
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -129,7 +131,7 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'home' %}">
             <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo">
-            Leadway Pensure PFA
+            Leadway Pension
             <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Budgeting & Performance System</span>
         </a>
         
@@ -155,6 +157,7 @@
     <p class="mb-5" style="color: #6c757d;">Select a module below to manage your budgeting and performance data</p>
 
     <div class="row g-4">
+        {# First Row: Core Data Management and Planning #}
         <div class="col-md-4">
             <a href="{% url 'data_management:historical_data' %}" class="text-decoration-none d-block h-100">
                 <div class="module-card">
@@ -169,14 +172,16 @@
         </div>
 
         <div class="col-md-4">
-            <div class="module-card">
-                <div>
-                    <i class="fas fa-cloud-upload-alt icon-upload"></i>
-                    <h4>Budget Inputs</h4>
-                    <p>Submit departmental budget requests</p>
+            <a href="{% url 'budget_input:submission_index' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-cloud-upload-alt icon-upload"></i>
+                        <h4>Budget Inputs</h4>
+                        <p>Submit departmental budget requests</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
                 </div>
-                <button class="btn btn-module-access disabled" disabled>Access Module</button>
-            </div>
+            </a>
         </div>
         
          <div class="col-md-4">
@@ -191,7 +196,8 @@
                 </div>
             </a>
         </div>
-
+        
+        {# Second Row: Configuration, Forecasting, and Analysis #}
         <div class="col-md-4">
             <a href="{% url 'setup:setup_index' %}" class="text-decoration-none d-block h-100">
                 <div class="module-card">
@@ -206,14 +212,16 @@
         </div>
 
         <div class="col-md-4">
-            <div class="module-card">
-                <div>
-                    <i class="fas fa-chart-line icon-chart"></i>
-                    <h4>Forecast</h4>
-                    <p>AI-powered financial forecasting</p>
+            <a href="{% url 'budget_input:forecast_dashboard' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-chart-line icon-chart"></i>
+                        <h4>Forecast</h4>
+                        <p>Scenario simulation and forward-looking financial statements</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
                 </div>
-                <button class="btn btn-module-access disabled" disabled>Access Module</button>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-4">
@@ -221,7 +229,7 @@
                 <div>
                     <i class="fas fa-chart-bar icon-clipboard"></i>
                     <h4>Analysis</h4>
-                    <p>Performance analysis and reporting</p>
+                    <p>Performance analysis and reporting (Budget vs Actual)</p>
                 </div>
                 <button class="btn btn-module-access disabled" disabled>Access Module</button>
             </div>

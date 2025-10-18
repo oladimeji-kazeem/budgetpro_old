@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block title %}Budget Assumptions{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .app-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+    .app-card.p-0 {
+        padding: 0 !important;
+    }
+    .budget-link {
+        color: var(--teal-accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .budget-link:hover {
+        color: var(--primary-dark);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Budget Input</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">Budget Assumptions Input</h1>
+    <p class="mb-4 text-muted">Create or modify a budget version by entering key drivers and assumptions.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="app-card">
+                <h4 class="fw-bold mb-4" style="color: var(--primary-dark);">Enter/Edit Budget Drivers</h4>
+                <p class="text-muted small">These values will be used with historical data to calculate future financial positions (I.S., B.S., C.F.).</p>
+                {% crispy form %}
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="app-card">
+                <h4 class="fw-bold mb-3" style="color: var(--primary-dark);">Existing Budget Versions</h4>
+                <p class="text-muted small">Select a version to load and modify its assumptions.</p>
+                
+                <ul class="list-group list-group-flush">
+                    {% for assumption in all_assumptions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold">{{ assumption.version_name }}</span> 
+                            <small class="text-muted d-block">Start: {{ assumption.period_start_date.date }}</small>
+                        </div>
+                        <a href="?pk={{ assumption.pk }}" class="budget-link">
+                            <i class="fas fa-edit me-1"></i> Load
+                        </a>
+                    </li>
+                    {% empty %}
+                     <li class="list-group-item text-center text-muted">
+                         No budget versions saved yet.
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <h4 class="fw-bold mt-4 mb-3" style="color: var(--primary-dark);">Financial Forecasts</h4>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action budget-link"><i class="fas fa-chart-line me-2"></i> View Forecasted Income Statement</a>
+                    <a href="#" class="list-group-item list-group-item-action budget-link"><i class="fas fa-balance-scale-right me-2"></i> View Forecasted Balance Sheet</a>
+                    <a href="#" class="list-group-item list-group-item-action budget-link"><i class="fas fa-money-bill-wave me-2"></i> View Forecasted Cash Flow</a>
+                    <a href="#" class="list-group-item list-group-item-action budget-link"><i class="fas fa-chart-pie me-2"></i> View Other Metrics</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

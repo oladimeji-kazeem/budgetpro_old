@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Scenario Forecast - {{ forecast_year }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .forecast-container {
+        padding-top: 100px;
+        padding-bottom: 80px; 
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .app-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+    }
+    /* Scenario Controls Styling */
+    .scenario-card {
+        background: #f1f1f1;
+        border-left: 5px solid var(--teal-accent);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .scenario-card .form-control {
+        font-weight: 700;
+    }
+    /* KPI Card Styling */
+    .kpi-card-forecast {
+        background: var(--primary-dark);
+        color: var(--white);
+        border-radius: 10px;
+        padding: 15px;
+        height: 100%;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .kpi-card-forecast h5 {
+        font-size: 0.9rem;
+        color: var(--teal-light);
+        margin-bottom: 5px;
+    }
+    .kpi-card-forecast p {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0;
+    }
+    /* Statement Table Styles */
+    .statement-table th {
+        white-space: nowrap;
+        background-color: #e9ecef;
+        color: var(--primary-dark);
+        font-weight: 600;
+    }
+    .statement-table td.amount-cell {
+        text-align: right;
+        white-space: nowrap;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+    .total-col {
+        background-color: var(--teal-accent) !important;
+        color: var(--white) !important;
+        font-weight: 700 !important;
+        border-left: 2px solid var(--white);
+    }
+    .net-line {
+        font-weight: 700;
+        background-color: #f8f9fa;
+        border-top: 2px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Scenario Forecast {{ forecast_year }}</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'budget_input:submission_index' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Budget Input
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container forecast-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">Financial Statement Forecast</h1>
+    <p class="mb-4 text-muted">Base Case: **{{ assumptions_version }}** | Forecast Year: **{{ forecast_year }}**</p>
+
+    {% if no_setup_data %}
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">Setup Incomplete!</h4>
+            <p>Cannot generate a meaningful forecast. Please ensure you have added dates to the <a href="{% url 'setup:date_detail_list' %}" class="alert-link">Date Table</a> and saved at least one <a href="{% url 'budget_input:assumption_dashboard' %}" class="alert-link">Budget Assumption</a>.</p>
+        </div>
+    {% endif %}
+
+    <div class="app-card scenario-card mb-4">
+        <h4 class="fw-bold mb-3" style="color: var(--primary-dark);">Scenario Simulation Controls</h4>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Revenue Growth Override (%)</label>
+                <input type="number" id="revenue-override" class="form-control" value="0.0" step="0.1">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">OPEX Reduction Override (%)</label>
+                <input type="number" id="opex-override" class="form-control" value="0.0" step="0.1">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tax Rate (%)</label>
+                <input type="number" id="tax-rate-override" class="form-control" value="30.0" step="1.0">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" id="apply-scenario">
+                    <i class="fas fa-calculator me-2"></i> Apply Scenario & Recalculate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5" id="kpi-summary">
+        <div class="col-md-4">
+            <div class="kpi-card-forecast">
+                <h5>Forecast Net Profit</h5>
+                <p id="kpi-net-profit">₦0</p>
+                <span class="small text-warning" id="np-variance">vs Base Case: 0.00%</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card-forecast">
+                <h5>Ending Retained Earnings</h5>
+                <p id="kpi-retained-earnings">₦0</p>
+                <span class="small text-warning" id="re-variance">vs Base Case: 0.00%</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card-forecast">
+                <h5>Ending Cash Balance</h5>
+                <p id="kpi-closing-cash">₦0</p>
+                <span class="small text-warning" id="cash-variance">vs Base Case: 0.00%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-card p-0">
+        <ul class="nav nav-tabs" id="statementTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" id="is-tab" data-bs-toggle="tab" data-bs-target="#income-statement" type="button" role="tab">Income Statement</button></li>
+            <li class="nav-item"><button class="nav-link" id="bs-tab" data-bs-toggle="tab" data-bs-target="#balance-sheet" type="button" role="tab">Balance Sheet</button></li>
+            <li class="nav-item"><button class="nav-link" id="cf-tab" data-bs-toggle="tab" data-bs-target="#cash-flow" type="button" role="tab">Cash Flow</button></li>
+        </ul>
+        <div class="tab-content p-3" id="statementTabsContent">
+            
+            <div class="tab-pane fade show active" id="income-statement" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm statement-table">
+                        <thead id="is-header"></thead>
+                        <tbody id="is-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="balance-sheet" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm statement-table">
+                        <thead id="bs-header"></thead>
+                        <tbody id="bs-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="cash-flow" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm statement-table">
+                        <thead id="cf-header"></thead>
+                        <tbody id="cf-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="fixed-bottom p-3" style="background-color: var(--white); border-top: 1px solid #e9ecef; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
+    <div class="container d-flex justify-content-center">
+        <button class="btn btn-primary w-50" onclick="window.print()"><i class="fas fa-print me-2"></i> Print Forecast</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- 1. DATA INITIALIZATION ---
+    // Ensure the data passed from Django is correctly parsed
+    const BASE_DATA = JSON.parse('{{ forecast_data_json|escapejs }}');
+    const BASE_CASE_INITIAL = JSON.parse(JSON.stringify(BASE_DATA));
+    let CURRENT_DATA = JSON.parse(JSON.stringify(BASE_DATA));
+
+    // Store base case totals for variance calculation
+    let BASE_TOTALS = {
+        NP: 0,
+        RE: 0,
+        CASH: 0
+    };
+
+    // --- 2. HELPER FUNCTIONS ---
+
+    // Formats a number into Naira currency string (₦1,234,567)
+    function formatNaira(num) {
+        if (num === null || num === undefined || isNaN(num)) return '0';
+        return '₦' + Math.round(num).toLocaleString('en-NG');
+    }
+    
+    // Calculates variance percentage
+    function calculateVariance(current, base) {
+        if (base === 0 || base.isZero()) return current.isZero() ? { text: '0.00%', class: 'text-warning' } : { text: '+100%', class: 'text-success' };
+        
+        const variance = (current.minus(base)).div(base).mul(100);
+        const sign = variance.gte(0) ? '+' : '';
+        const color = variance.gte(0) ? 'text-success' : 'text-danger';
+        
+        return { text: `${sign}${variance.toFixed(2)}%`, class: color };
+    }
+    
+    // --- 3. DECIMAL.JS LIBRARY MOCKUP (Crucial for precision and to prevent errors) ---
+    // Since we cannot include external script, we use a simple Number mock that respects the Decimal.js API used in the view.
+    // NOTE: This relies on the Django context data being passed as numbers/strings that can be parsed as numbers.
+    const Decimal = (value) => new Number(value); 
+    Decimal.plus = (a, b) => a + b;
+    Decimal.minus = (a, b) => a - b;
+    Decimal.mul = (a, b) => a * b;
+    Decimal.div = (a, b) => a / b;
+    Decimal.prototype.plus = function(b) { return new Decimal(this.valueOf() + b.valueOf()); };
+    Decimal.prototype.minus = function(b) { return new Decimal(this.valueOf() - b.valueOf()); };
+    Decimal.prototype.mul = function(b) { return new Decimal(this.valueOf() * b.valueOf()); };
+    Decimal.prototype.div = function(b) { return new Decimal(this.valueOf() / b.valueOf()); };
+    Decimal.prototype.sub = function(b) { return new Decimal(this.valueOf() - b.valueOf()); };
+    Decimal.prototype.abs = function() { return new Decimal(Math.abs(this.valueOf())); };
+    Decimal.prototype.round = function() { return new Decimal(Math.round(this.valueOf())); };
+    Decimal.prototype.toFixed = function(dp) { return this.valueOf().toFixed(dp); };
+    Decimal.prototype.isZero = function() { return this.valueOf() === 0; };
+    Decimal.prototype.gte = function(b) { return this.valueOf() >= b.valueOf(); };
+
+
+    // --- 4. RECALCULATION LOGIC (Core Simulation Engine) ---
+
+    function recalculateForecast(revOverridePct, opexOverridePct, taxRatePct) {
+        let scenarioData = JSON.parse(JSON.stringify(BASE_CASE_INITIAL));
+
+        const taxRate = new Decimal(taxRatePct).div(100);
+        const revMultiplier = new Decimal(1).plus(new Decimal(revOverridePct).div(100));
+        const opexMultiplier = new Decimal(1).minus(new Decimal(opexOverridePct).div(100));
+        
+        let retainedEarnings = new Decimal(0);
+        let cashBalance = new Decimal(BASE_CASE_INITIAL.CF.length > 0 ? BASE_CASE_INITIAL.CF[0].opening_cash : 1_000_000_000); 
+        let totalAnnualNetProfit = new Decimal(0);
+        let accumulatedCapex = new Decimal(0);
+
+        for (let i = 0; i < 12; i++) {
+            const baseIS = BASE_CASE_INITIAL.IS[i];
+            const baseBS = BASE_CASE_INITIAL.BS[i];
+            const baseCF = BASE_CASE_INITIAL.CF[i];
+            
+            // Convert monthly data items to Decimal for math
+            const baseRevenue = new Decimal(baseIS.total_revenue);
+            const baseStaffCosts = new Decimal(baseIS.staff_costs);
+            const baseAdminExpenses = new Decimal(baseIS.admin_expenses);
+            const baseInvestmentReturn = new Decimal(baseIS.investment_return);
+            const baseNetCashInvesting = new Decimal(baseCF.net_cash_investing);
+            const baseAumLiability = new Decimal(baseBS.aum_liability);
+            
+            // --- IS Recalculation ---
+            const totalRevenue = baseRevenue.mul(revMultiplier);
+            const staffCosts = baseStaffCosts.mul(opexMultiplier);
+            const adminExpenses = baseAdminExpenses.mul(opexMultiplier);
+            const totalOpex = staffCosts.plus(adminExpenses);
+            
+            const pbt = totalRevenue.plus(baseInvestmentReturn).minus(totalOpex);
+            const taxAmount = pbt.mul(taxRate);
+            const netProfit = pbt.minus(taxAmount);
+            
+            // --- BS Recalculation (Iterative) ---
+            retainedEarnings = retainedEarnings.plus(netProfit);
+            
+            // --- CF Recalculation (Iterative) ---
+            const netCashOps = totalRevenue.minus(totalOpex);
+            const netCashInvesting = baseNetCashInvesting; 
+            const netChangeCash = netCashOps.plus(netCashInvesting);
+
+            const openingCashPrev = cashBalance;
+            cashBalance = cashBalance.plus(netChangeCash);
+            
+            // Simple accumulation of CAPEX (as Fixed Assets)
+            accumulatedCapex = accumulatedCapex.plus(baseNetCashInvesting.abs()); 
+
+            // --- Update Scenario Data ---
+            
+            // IS
+            scenarioData.IS[i].total_revenue = totalRevenue;
+            scenarioData.IS[i].staff_costs = staffCosts;
+            scenarioData.IS[i].admin_expenses = adminExpenses;
+            scenarioData.IS[i].total_opex = totalOpex;
+            scenarioData.IS[i].pbt = pbt;
+            scenarioData.IS[i].tax = taxAmount;
+            scenarioData.IS[i].net_profit = netProfit;
+            totalAnnualNetProfit = totalAnnualNetProfit.plus(netProfit);
+
+            // BS
+            scenarioData.BS[i].cash_balance = cashBalance;
+            scenarioData.BS[i].retained_earnings = retainedEarnings;
+            scenarioData.BS[i].fixed_assets = accumulatedCapex;
+            scenarioData.BS[i].total_assets = cashBalance.plus(accumulatedCapex).plus(baseAumLiability);
+            scenarioData.BS[i].total_liabilities_equity = scenarioData.BS[i].total_assets; 
+            
+            // CF
+            scenarioData.CF[i].net_cash_ops = netCashOps;
+            scenarioData.CF[i].net_change_cash = netChangeCash;
+            scenarioData.CF[i].opening_cash = openingCashPrev;
+            scenarioData.CF[i].closing_cash = cashBalance;
+        }
+
+        CURRENT_DATA = scenarioData;
+        
+        // Return totals for KPI update
+        return {
+            NP: totalAnnualNetProfit,
+            RE: retainedEarnings, // Ending retained earnings
+            CASH: cashBalance // Ending cash balance
+        };
+    }
+
+    // --- 5. RENDERING FUNCTIONS ---
+    
+    // Renders the table headers (Months + Total)
+    function renderHeaders(targetId) {
+        let html = `<tr><th style="width: 200px;">Description</th>`;
+        if (CURRENT_DATA.metadata.months.length === 0) return;
+        
+        CURRENT_DATA.metadata.months.forEach(month => {
+            html += `<th>${month}</th>`;
+        });
+        html += `<th class="total-col">Annual Total</th></tr>`;
+        document.getElementById(targetId).innerHTML = html;
+    }
+
+    // Renders the financial statement bodies
+    function renderStatementBody(statementType, targetId) {
+        const body = document.getElementById(targetId);
+        body.innerHTML = '';
+
+        if (CURRENT_DATA[statementType].length === 0) {
+            body.innerHTML = `<tr><td colspan="14" class="text-center text-muted">No forecast data available. Please check your setup (Dates and Assumptions).</td></tr>`;
+            return;
+        }
+
+        const lineItems = Object.keys(CURRENT_DATA[statementType][0]).filter(key => key !== 'period');
+        
+        // Define display names and styling for lines
+        const displayMapping = {
+            'revenue_mgmt_fee': { name: 'Mgmt Fee Revenue', style: '' },
+            'revenue_admin_fee': { name: 'Admin Fee Revenue', style: '' },
+            'total_revenue': { name: 'TOTAL REVENUE', style: 'net-line' },
+
+            'investment_return': { name: 'Investment Income', style: '' },
+            
+            'staff_costs': { name: 'Staff Costs', style: '' },
+            'admin_expenses': { name: 'Admin/OPEX Expenses', style: '' },
+            'total_opex': { name: 'TOTAL OPEX', style: 'net-line' },
+            
+            'pbt': { name: 'PROFIT BEFORE TAX', style: 'net-line' },
+            'tax': { name: 'Tax Expense', style: '' },
+            'net_profit': { name: 'NET PROFIT', style: 'net-line total-col' },
+            
+            'cash_balance': { name: 'Cash & Bank', style: '' },
+            'fixed_assets': { name: 'Fixed Assets (CAPEX)', style: '' },
+            'total_assets': { name: 'TOTAL ASSETS', style: 'net-line total-col' },
+            'liabilities': { name: 'Current Liabilities', style: '' },
+            'aum_liability': { name: 'AUM Liability (Equity)', style: '' },
+            'retained_earnings': { name: 'Retained Earnings', style: 'net-line' },
+            'total_liabilities_equity': { name: 'TOTAL LIA & EQUITY', style: 'net-line total-col' },
+
+            'opening_cash': { name: 'Opening Cash Balance', style: '' },
+            'net_cash_ops': { name: 'Net Cash from Ops', style: '' },
+            'net_cash_investing': { name: 'Net Cash from Investing', style: '' },
+            'net_cash_financing': { name: 'Net Cash from Financing', style: '' },
+            'net_change_cash': { name: 'Net Change in Cash', style: 'net-line' },
+            'closing_cash': { name: 'CLOSING CASH BALANCE', style: 'net-line total-col' },
+        };
+        
+        // Filter lines relevant to the current statement type (IS/BS/CF)
+        const relevantLines = lineItems.filter(key => {
+            if (statementType === 'IS') return ['revenue_mgmt_fee', 'revenue_admin_fee', 'total_revenue', 'investment_return', 'staff_costs', 'admin_expenses', 'total_opex', 'pbt', 'tax', 'net_profit'].includes(key);
+            if (statementType === 'BS') return ['cash_balance', 'fixed_assets', 'total_assets', 'liabilities', 'aum_liability', 'retained_earnings', 'total_liabilities_equity'].includes(key);
+            if (statementType === 'CF') return ['opening_cash', 'net_cash_ops', 'net_cash_investing', 'net_cash_financing', 'net_change_cash', 'closing_cash'].includes(key);
+            return false;
+        });
+
+        relevantLines.forEach(key => {
+            if (!displayMapping[key]) return;
+            
+            const line = displayMapping[key];
+            const row = body.insertRow();
+            row.classList.add(line.style);
+            
+            row.insertCell().textContent = line.name;
+            
+            let annualTotal = new Decimal(0);
+
+            // Monthly Data Cells
+            CURRENT_DATA[statementType].forEach(monthData => {
+                const value = new Decimal(monthData[key] || 0);
+                row.insertCell().textContent = formatNaira(value);
+                row.cells[row.cells.length - 1].classList.add('amount-cell');
+                annualTotal = annualTotal.plus(value);
+            });
+
+            // Annual Total Cell
+            const totalCell = row.insertCell();
+            const lastMonthData = CURRENT_DATA[statementType][11];
+
+            if (statementType === 'BS' || key.includes('cash_balance')) {
+                // Balance Sheet items and Cash Balance show the last period's balance
+                const lastValue = new Decimal(lastMonthData[key] || 0);
+                totalCell.textContent = formatNaira(lastValue);
+            } else {
+                // IS and CF (except final balances) show the sum of the months
+                totalCell.textContent = formatNaira(annualTotal);
+            }
+            totalCell.classList.add('amount-cell', 'total-col');
+        });
+    }
+
+    // Updates KPI summary cards and variance
+    function updateKpiSummary(currentTotals) {
+        // Calculate base totals only once
+        if (BASE_TOTALS.NP === 0) {
+            BASE_TOTALS.NP = new Decimal(BASE_CASE_INITIAL.IS.reduce((sum, item) => sum.plus(new Decimal(item.net_profit)), new Decimal(0)));
+            BASE_TOTALS.RE = new Decimal(BASE_CASE_INITIAL.BS[11].retained_earnings);
+            BASE_TOTALS.CASH = new Decimal(BASE_CASE_INITIAL.CF[11].closing_cash);
+        }
+        
+        // Net Profit
+        document.getElementById('kpi-net-profit').textContent = formatNaira(currentTotals.NP);
+        const npVar = calculateVariance(currentTotals.NP, BASE_TOTALS.NP);
+        document.getElementById('np-variance').textContent = `vs Base Case: ${npVar.text}`;
+        document.getElementById('np-variance').className = `small ${npVar.class}`;
+
+        // Retained Earnings
+        document.getElementById('kpi-retained-earnings').textContent = formatNaira(currentTotals.RE);
+        const reVar = calculateVariance(currentTotals.RE, BASE_TOTALS.RE);
+        document.getElementById('re-variance').textContent = `vs Base Case: ${reVar.text}`;
+        document.getElementById('re-variance').className = `small ${reVar.class}`;
+
+        // Closing Cash
+        document.getElementById('kpi-closing-cash').textContent = formatNaira(currentTotals.CASH);
+        const cashVar = calculateVariance(currentTotals.CASH, BASE_TOTALS.CASH);
+        document.getElementById('cash-variance').textContent = `vs Base Case: ${cashVar.text}`;
+        document.getElementById('cash-variance').className = `small ${cashVar.class}`;
+    }
+
+    // Master render function
+    function renderAll() {
+        renderHeaders('is-header');
+        renderHeaders('bs-header');
+        renderHeaders('cf-header');
+        
+        renderStatementBody('IS', 'is-body');
+        renderStatementBody('BS', 'bs-body');
+        renderStatementBody('CF', 'cf-body');
+        
+        // Recalculate with current UI settings to initialize KPIs
+        const rev = parseFloat(document.getElementById('revenue-override').value) || 0;
+        const opex = parseFloat(document.getElementById('opex-override').value) || 0;
+        const tax = parseFloat(document.getElementById('tax-rate-override').value) || 30;
+        const initialTotals = recalculateForecast(rev, opex, tax);
+        updateKpiSummary(initialTotals);
+    }
+    
+    // --- 6. EVENT HANDLERS ---
+    
+    document.getElementById('apply-scenario').addEventListener('click', function() {
+        const rev = parseFloat(document.getElementById('revenue-override').value) || 0;
+        const opex = parseFloat(document.getElementById('opex-override').value) || 0;
+        const tax = parseFloat(document.getElementById('tax-rate-override').value) || 30;
+        
+        const newTotals = recalculateForecast(rev, opex, tax);
+        renderAll();
+        updateKpiSummary(newTotals);
+
+        // Scroll to results
+        document.getElementById('kpi-summary').scrollIntoView({ behavior: 'smooth' });
+    });
+
+
+    // --- 7. INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', function() {
+        if (BASE_DATA.IS && BASE_DATA.IS.length > 0) {
+            renderAll();
+        } else {
+            // Render blank state as requested
+            renderHeaders('is-header');
+            renderHeaders('bs-header');
+            renderHeaders('cf-header');
+            renderStatementBody('IS', 'is-body');
+            renderStatementBody('BS', 'bs-body');
+            renderStatementBody('CF', 'cf-body');
+            document.getElementById('kpi-summary').style.display = 'none';
+        }
+    });
+
+</script>
+{% endblock %}

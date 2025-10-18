@@ -50,4 +50,10 @@ urlpatterns = [
     path('glaccount/<int:pk>/edit/', views.GLAccountUpdateView.as_view(), name='glaccount_update'),
     path('glaccount/<int:pk>/delete/', views.GLAccountDeleteView.as_view(), name='glaccount_delete'),
 
+    # Department URLs
+    path('department/', views.DepartmentListView.as_view(), name='department_list'),    
+    path('department/new/', views.DepartmentCreateView.as_view(), name='department_create'),
+    path('department/<int:pk>/edit/', views.DepartmentUpdateView.as_view(), name='department_update'),
+    path('department/<int:pk>/delete/', views.DepartmentDeleteView.as_view(), name='department_delete'),
+
 ]

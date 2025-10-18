@@ -1,0 +1,86 @@
+# oladimeji-kazeem/budgetpro/budgetpro-ab94e7d262d0d24f247fd60a27eb8be6e83a6e36/templates/budget_input/submission_base.html
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .budget-container {
+        padding-top: 100px;
+        padding-bottom: 80px; /* Increased space for the fixed footer */
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .app-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+    .form-card {
+        padding: 25px;
+    }
+    .module-link {
+        display: block;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #e9f8f7;
+        border: 1px solid var(--teal-accent);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--primary-dark);
+        transition: all 0.2s;
+    }
+    .module-link:hover {
+        background: #d8f0ed;
+        transform: translateY(-2px);
+    }
+    .module-link i {
+        color: var(--teal-accent);
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Budget Submissions</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container budget-container">
+    {% block submission_content %}{% endblock %}
+</div>
+
+<div class="fixed-bottom p-3" style="background-color: var(--secondary-dark); box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+    <div class="container">
+        <div class="d-flex justify-content-end align-items-center">
+            <a href="{% url 'budget_input:forecast_dashboard' %}" class="btn btn-sm btn-outline-light me-3">
+                <i class="fas fa-chart-line me-1"></i> Generate Forecast
+            </a>
+            <a href="#" class="btn btn-sm btn-outline-warning">
+                <i class="fas fa-check-double me-1"></i> Executive Approval Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

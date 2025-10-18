@@ -2,7 +2,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit
 # FIX: Added GLAccount to the import list
-from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail, GLAccount 
+from .models import RSAFund, State, Location, Region, ManagedFund, DateDetail, GLAccount, Department
 
 class BaseSetupForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -78,7 +78,14 @@ class DateDetailForm(BaseSetupForm):
         )
         self.helper.form_method = 'post'
 
-
+# --- NEW: Department Forms ---
+class DepartmentForm(BaseSetupForm):
+    class Meta:
+        model = Department
+        fields = ('name', 'head', 'is_active')
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'e.g., Finance'}),
+        }
 # ... (existing imports and other forms)
 
 # 7. GLAccount Forms

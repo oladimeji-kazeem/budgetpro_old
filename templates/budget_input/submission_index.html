@@ -1,0 +1,106 @@
+{% extends 'budget_input/submission_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block submission_content %}
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">Budget Input Submission</h1>
+    <p class="mb-4 text-muted">Submit departmental budget requests for approval.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4 mb-5">
+        <!-- Submission Links Column -->
+        <div class="col-md-5">
+            <div class="app-card">
+                <h4 class="fw-bold mb-4" style="color: var(--primary-dark);">Budget Submission Forms</h4>
+                
+                <a href="{% url 'budget_input:submit_opex' %}" class="module-link">
+                    <i class="fas fa-hand-holding-usd"></i> OPEX Budget Submission
+                </a>
+                
+                <a href="{% url 'budget_input:submit_capex' %}" class="module-link">
+                    <i class="fas fa-sitemap"></i> CAPEX Budget Submission
+                </a>
+                
+                <a href="{% url 'budget_input:submit_pin_data' %}" class="module-link">
+                    <i class="fas fa-users"></i> PIN Data Submission
+                </a>
+                
+                <hr>
+                
+                <a href="{% url 'budget_input:assumption_dashboard' %}" class="module-link" style="background: #fff3cd; border-color: #ffeeba;">
+                    <i class="fas fa-calculator" style="color: #856404;"></i> Global Budget Assumptions
+                </a>
+
+                <hr>
+
+                <h5 class="fw-bold mt-4 mb-3" style="color: var(--primary-dark);">Download Templates</h5>
+                <a href="{% url 'data_management:download_template' template_type='gl_transactions' %}" class="module-link">
+                    <i class="fas fa-file-excel"></i> Download OPEX Template
+                </a>
+                <a href="{% url 'data_management:download_template' template_type='managed_fund' %}" class="module-link">
+                    <i class="fas fa-file-excel"></i> Download CAPEX Template
+                </a>
+                <a href="{% url 'data_management:download_template' template_type='rsa_fund' %}" class="module-link">
+                    <i class="fas fa-file-excel"></i> Download PIN Data Template
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Recent Activity Column -->
+        <div class="col-md-7">
+            <div class="app-card p-0">
+                <div class="p-4 border-bottom">
+                    <h4 class="fw-bold mb-0" style="color: var(--primary-dark);">Recent Activity</h4>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0 small">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Department</th>
+                                <th class="text-end">Amount/PINS</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_submissions %}
+                            <tr>
+                                <td><span class="badge bg-{% if tx.transaction_type == 'CAPEX' %}info{% else %}warning text-dark{% endif %}">{{ tx.transaction_type }}</span></td>
+                                <td>{{ tx.department.name }}</td>
+                                <td class="text-end fw-bold">₦{{ tx.annual_amount|intcomma }}</td>
+                                <td><span class="badge bg-secondary">{{ tx.status }}</span></td>
+                                <td>{{ tx.submission_date|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No recent OPEX/CAPEX submissions.</td>
+                            </tr>
+                            {% endfor %}
+
+                            {% for pin in recent_pin_data %}
+                            <tr>
+                                <td><span class="badge bg-success">PIN Data</span></td>
+                                <td>{{ pin.department.name }}</td>
+                                <td class="text-end">{{ pin.active_pins|intcomma }} Active PINS</td>
+                                <td><span class="badge bg-success">Saved</span></td>
+                                <td>{{ pin.submission_date|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

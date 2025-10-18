@@ -295,3 +295,24 @@ class RSAFundHistorical(models.Model):
         verbose_name = "RSA Fund Historical"
         verbose_name_plural = "RSA Fund Historicals"
         ordering = ['period_end_date']
+
+class Department(models.Model):
+    name = models.CharField(max_length=150, unique=True, verbose_name="Department Name")
+    head = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='departments_headed',
+        verbose_name="Department Head"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Department"
+        verbose_name_plural = "Departments"
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
