@@ -1,0 +1,207 @@
+# oladimeji-kazeem/budgetpro/budgetpro-ab94e7d262d0d24f247fd60a27eb8be6e83a6e36/templates/analysis/analysis_report.html
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ report_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    /* === KPI Card Styling === */
+    .kpi-card-container {
+        margin-bottom: 30px;
+    }
+    .kpi-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); 
+        height: 100%;
+    }
+    .kpi-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+    .kpi-card p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* === Report Table Styles === */
+    .table-report {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+    }
+    .table-report th, .table-report td {
+        padding: 12px 10px;
+        white-space: nowrap;
+        font-size: 0.9em;
+    }
+    .table-report thead th {
+        background-color: #f1f1f1;
+        color: var(--primary-dark);
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        text-align: center;
+    }
+    .amount-cell {
+        text-align: right;
+    }
+    .variance-pos { color: #28a745; font-weight: 600; }
+    .variance-neg { color: #dc3545; font-weight: 600; }
+    .header-row {
+        font-weight: 700;
+        background-color: #f8f9fa;
+        color: var(--primary-dark);
+        border-top: 1px solid #dee2e6;
+    }
+    .major-total-row {
+        font-weight: 700;
+        background-color: var(--teal-accent);
+        color: var(--white);
+        border-top: 3px solid #3fb8af;
+        border-bottom: 3px double #3fb8af;
+    }
+    .filter-form-container {
+        margin-bottom: 30px;
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Analysis</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'analysis:analysis_dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Analysis Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">{{ report_title }}</h1>
+    <p class="mb-4 text-muted">Comparative view for the {{ period_label }} ended: {{ report_data.0.date|date:"Y-m-d"|default:"Latest Period" }}</p>
+
+    <div class="filter-form-container">
+        <p class="text-muted small mb-3">Apply filters and period type.</p>
+        {% crispy filter_form %}
+    </div>
+
+    <div class="row g-4 kpi-card-container">
+        {% for kpi in kpis %}
+        <div class="col-md-4">
+            <div class="kpi-card border-{{ kpi.color }}">
+                <p class="text-{{ kpi.color }} mb-1">{{ kpi.title }}</p>
+                <h4 class="text-{{ kpi.color }}">{{ kpi.value }}</h4>
+                <p class="mb-0 small">{{ kpi.subtitle }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="card p-0 table-report">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 250px; text-align: left;">Description</th>
+                        <th title="Actual {{ reporting_period }}">Actual</th>
+                        <th title="Budget {{ reporting_period }}">Budget</th>
+                        
+                        {# Income Statement Specific Columns #}
+                        {% if is_income_statement %}
+                            <th title="Actual vs Budget Variance (Absolute)">Variance (₦)</th>
+                            <th title="Actual vs Budget Variance (%)">Variance (%)</th>
+                            <th title="Month-over-Month Growth">MoM (%)</th>
+                            <th title="Quarter-over-Quarter Growth">QoQ (%)</th>
+                            <th title="Year-over-Year Growth">YoY (%)</th>
+                        {% endif %}
+
+                        {# General Comparative Column for BS/CF #}
+                        {% if not is_income_statement %}
+                            <th title="Previous Period">Previous {{ period_label }}</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in report_data %}
+                        {% if item.type == 'header' %}
+                            <tr class="header-row">
+                                <td colspan="10">{{ item.desc }}</td>
+                            </tr>
+                        {% else %}
+                            <tr class="{% if item.type == 'major_total' %}major-total-row{% elif item.type == 'subtotal' %}header-row{% endif %}">
+                                <td>{{ item.desc }}</td>
+                                <td class="amount-cell">{{ item.actual|intcomma }}</td>
+                                <td class="amount-cell">{{ item.budget|intcomma }}</td>
+
+                                {# Income Statement Variance Columns #}
+                                {% if is_income_statement %}
+                                    <td class="amount-cell {% if item.variance >= 0 %}variance-pos{% else %}variance-neg{% endif %}">
+                                        {{ item.variance|intcomma }}
+                                    </td>
+                                    <td class="amount-cell {% if item.variance_pct >= 0 %}variance-pos{% else %}variance-neg{% endif %}">
+                                        {{ item.variance_pct|floatformat:2 }}%
+                                    </td>
+                                    <td class="amount-cell {% if item.mom >= 0 %}variance-pos{% else %}variance-neg{% endif %}">
+                                        {{ item.mom|floatformat:2 }}%
+                                    </td>
+                                    <td class="amount-cell {% if item.qoq >= 0 %}variance-pos{% else %}variance-neg{% endif %}">
+                                        {{ item.qoq|floatformat:2 }}%
+                                    </td>
+                                    <td class="amount-cell {% if item.yoy >= 0 %}variance-pos{% else %}variance-neg{% endif %}">
+                                        {{ item.yoy|floatformat:2 }}%
+                                    </td>
+                                {% endif %}
+                                
+                                {# General Comparative Column (Using Budget as Mock Previous for BS/CF) #}
+                                {% if not is_income_statement %}
+                                    <td class="amount-cell">{{ item.budget|intcomma }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('printButton').addEventListener('click', function() {
+        window.print();
+    });
+</script>
+{% endblock %}

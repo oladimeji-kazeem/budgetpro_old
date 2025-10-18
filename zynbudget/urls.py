@@ -10,6 +10,8 @@ urlpatterns = [
     path('data/', include('data_management.urls', namespace='data_management')), # ADDED new data module
     path('aum/', include('aum_management.urls', namespace='aum_management')), # ADDED new AUM module
     path('budget/', include('budget_input.urls', namespace='budget_input')), # ADDED new Budget Input module
+    path('analysis/', include('analysis.urls', namespace='analysis')), # ADDED new Analysis module
+    path('predictive/', include('predictive_analytics.urls', namespace='predictive_analytics')), # ADDED new Predictive Analytics module
 ]
 
 # Add this for serving media files in development

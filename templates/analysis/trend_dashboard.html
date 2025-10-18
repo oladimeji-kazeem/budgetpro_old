@@ -1,0 +1,264 @@
+# oladimeji-kazeem/budgetpro/budgetpro-ab94e7d262d0d24f247fd60a27eb8be6e83a6e36/templates/analysis/trend_dashboard.html
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Trend Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .report-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .chart-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        /* Removed min-height here as the inner div now controls height */
+    }
+    .chart-title {
+        color: var(--primary-dark);
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .chart-placeholder {
+        text-align: center;
+        padding-top: 100px;
+        color: #adb5bd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Trend Dashboard</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'analysis:analysis_dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Analysis Home
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container report-container">
+    <h1 class="mb-1" style="color: var(--primary-dark); font-weight: 700;">Comprehensive Trend Dashboard</h1>
+    <p class="mb-4 text-muted">Visualizing performance trends across key financial and operational metrics (32 Quarters).</p>
+
+    <div class="row g-4">
+        
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="chart-title"><i class="fas fa-chart-line me-2"></i> Revenue & AUM Trends (Millions ₦)</h5>
+                <div style="position: relative; height:350px;">  <canvas id="revenueAUMChart"></canvas>
+                </div>
+                <div class="chart-placeholder" id="revenueAUMPlaceholder" style="display: none;">Loading Chart...</div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="chart-title"><i class="fas fa-percent me-2"></i> Profitability Ratios (ROA, ROE, Margin)</h5>
+                <div style="position: relative; height:350px;">  <canvas id="profitabilityChart"></canvas>
+                </div>
+                <div class="chart-placeholder" id="profitabilityPlaceholder" style="display: none;">Loading Chart...</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="chart-title"><i class="fas fa-funnel-dollar me-2"></i> Expense Ratio % vs AUM Growth %</h5>
+                <div style="position: relative; height:350px;">  <canvas id="expenseChart"></canvas>
+                </div>
+                <div class="chart-placeholder" id="expensePlaceholder" style="display: none;">Loading Chart...</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-card">
+                <h5 class="chart-title"><i class="fas fa-table me-2"></i> Raw Trend Data Summary</h5>
+                <table class="table table-sm table-striped small">
+                    <thead>
+                        <tr><th>Metric</th><th>Latest Q4-2029</th><th>YoY Change</th></tr>
+                    </thead>
+                    <tbody id="dataSummaryTable">
+                        <tr><td colspan="3" class="text-center text-muted">Data processing...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    const RAW_DATA = JSON.parse('{{ chart_data_json|escapejs }}');
+    const LABELS = RAW_DATA.labels;
+
+    // Helper to format currency/percent for tooltips
+    function formatValue(value, isPercent) {
+        if (isPercent) {
+            return `${value.toFixed(2)}%`;
+        }
+        // Assuming value is scaled down to millions (M) in the view
+        return `₦${value.toFixed(2)}M`;
+    }
+
+    function createChart(chartId, title, dataFilter, chartType = 'line') {
+        // Ensure the previous chart instance is destroyed if it exists (for robustness)
+        let chartStatus = Chart.getChart(chartId);
+        if (chartStatus !== undefined) {
+          chartStatus.destroy();
+        }
+
+        const ctx = document.getElementById(chartId).getContext('2d');
+        
+        // Map datasets and explicitly assign yAxisID based on the 'is_percent' property fetched from the view
+        const datasets = RAW_DATA.datasets.filter(dataFilter).map(ds => ({
+            label: ds.label,
+            data: ds.data,
+            borderColor: ds.color,
+            backgroundColor: ds.color.replace('0.8', '0.2'),
+            yAxisID: ds.is_percent ? 'y-percent' : 'y-naira',
+            tension: 0.3,
+            type: chartType, 
+            fill: false,
+        }));
+        
+        // Configuration for the dual-axis chart (Stabilized)
+        const scalesConfig = {
+            'y-naira': {
+                type: 'linear',
+                position: 'left',
+                min: 0, 
+                ticks: {
+                    callback: (value) => {
+                        if (value >= 1000) return (value / 1000).toFixed(0) + 'B';
+                        return value.toFixed(0) + 'M';
+                    },
+                },
+                title: { display: true, text: 'Amount (Millions ₦)' }
+            },
+            'y-percent': {
+                type: 'linear',
+                position: 'right',
+                min: 0, 
+                grid: { drawOnChartArea: false },
+                ticks: {
+                    callback: (value) => value + '%',
+                },
+                title: { display: true, text: 'Rate (%)' }
+            }
+        };
+
+        new Chart(ctx, {
+            data: { labels: LABELS, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // MaintainAspectRatio false works now because the parent height is fixed
+                plugins: {
+                    title: { display: false, text: title },
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const ds = context.dataset;
+                                const isPercent = ds.yAxisID === 'y-percent';
+                                return `${ds.label}: ${formatValue(context.parsed.y, isPercent)}`;
+                            }
+                        }
+                    }
+                },
+                scales: scalesConfig
+            }
+        });
+    }
+
+    function renderSummaryTable() {
+        const tableBody = document.getElementById('dataSummaryTable');
+        tableBody.innerHTML = '';
+        
+        if (RAW_DATA.datasets.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No trend data available.</td></tr>';
+            return;
+        }
+
+        RAW_DATA.datasets.forEach(ds => {
+            const latestValue = ds.data[ds.data.length - 1];
+            const prevYearValue = ds.data[ds.data.length - 5] || 0; 
+            
+            let yoyChange = 0;
+            if (prevYearValue !== 0) {
+                 yoyChange = ((latestValue - prevYearValue) / prevYearValue) * 100;
+            }
+            
+            const yoyText = yoyChange >= 0 ? `+${yoyChange.toFixed(2)}%` : `${yoyChange.toFixed(2)}%`;
+            const yoyClass = yoyChange >= 0 ? 'text-success' : 'text-danger';
+            const latestText = formatValue(latestValue, ds.is_percent);
+
+            const row = tableBody.insertRow();
+            row.insertCell().textContent = ds.label;
+            row.insertCell().textContent = latestText;
+            row.cells[1].classList.add('text-end');
+            
+            const changeCell = row.insertCell();
+            changeCell.textContent = yoyText;
+            changeCell.classList.add('text-end', yoyClass);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (RAW_DATA.labels && RAW_DATA.labels.length > 0) {
+            document.getElementById('dataSummaryTable').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Generating charts...</td></tr>';
+            
+            // Hide placeholders and ensure canvas is visible
+            document.getElementById('revenueAUMPlaceholder').style.display = 'none';
+            document.getElementById('profitabilityPlaceholder').style.display = 'none';
+            document.getElementById('expensePlaceholder').style.display = 'none';
+            
+            // Chart 1: Revenue vs. AUM (Line Chart)
+            createChart('revenueAUMChart', 'Revenue & AUM Trends', 
+                         ds => !ds.is_percent && (ds.label.includes('Revenue') || ds.label.includes('AUM')), 'line');
+            
+            // Chart 2: Profitability Ratios (Line Chart)
+            createChart('profitabilityChart', 'Profitability Ratios', 
+                         ds => ds.is_percent && (ds.label.includes('Return') || ds.label.includes('Profit Margin')), 'line');
+
+            // Chart 3: Expense Ratio vs AUM Growth (Bar Chart)
+            createChart('expenseChart', 'Expense Ratio % vs AUM Growth %', 
+                         ds => ds.is_percent && (ds.label.includes('Expense') || ds.label.includes('AUM Growth')), 'bar');
+            
+            renderSummaryTable();
+        } else {
+            // Display placeholders if no data
+            document.getElementById('revenueAUMPlaceholder').style.display = 'block';
+            document.getElementById('profitabilityPlaceholder').style.display = 'block';
+            document.getElementById('expensePlaceholder').style.display = 'block';
+            document.getElementById('dataSummaryTable').innerHTML = '<tr><td colspan="3" class="text-center text-muted">No trend data available.</td></tr>';
+        }
+    });
+</script>
+{% endblock %}

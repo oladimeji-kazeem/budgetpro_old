@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Predictive Analytics Hub{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+        color: #343a40;
+    }
+    .analytics-container {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+    .navbar-dashboard {
+        background-color: var(--white);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .module-card {
+        background: var(--white);
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        text-decoration: none;
+        color: var(--primary-dark);
+        display: block;
+    }
+    .module-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: var(--primary-dark);
+    }
+    .module-card h4 {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .module-card i {
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+    .module-card p {
+        color: #6c757d;
+        font-size: 14px;
+        flex-grow: 1;
+    }
+    .icon-primary { color: #007bff; }
+    .icon-danger { color: #dc3545; }
+    .icon-success { color: #28a745; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dashboard">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <img src="{% static 'images/zyn_logo.png' %}" alt="Leadway Pension Logo" style="height: 30px; margin-right: 10px;">
+            Leadway Pension
+            <span style="font-size: 14px; color: #6c757d; font-weight: 400; margin-left: 10px;">| Predictive Analytics</span>
+        </a>
+        <div class="user-info">
+             <a href="{% url 'dashboard' %}" class="logout-link" style="color: var(--primary-dark);">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container analytics-container">
+    <h1 class="mb-4" style="color: var(--primary-dark); font-weight: 700;">Predictive Analytics Hub</h1>
+    <p class="mb-5" style="color: #6c757d;">Leverage Machine Learning to generate forecasts, identify risks, and gain strategic customer insights.</p>
+
+    <div class="row g-4">
+        {% for module in sub_modules %}
+        <div class="col-md-4">
+            <a href="{% url module.url %}" class="module-card">
+                <i class="{{ module.icon }} icon-{{ module.color }}"></i>
+                <h4>{{ module.name }}</h4>
+                {% if module.url == 'predictive_analytics:financial_forecasting' %}
+                    <p>Uses **Time Series models (LSTMs, ARIMA)** to predict key financial targets, including **AUM growth**, **Total Revenue/Fee Income**, and **RSA Contribution/Payout Flows** for automated financial planning.</p>
+                {% elif module.url == 'predictive_analytics:budget_management' %}
+                    <p>Employs **Classification and Anomaly Detection** to flag high-risk areas. Predicts the likelihood of **negative budget variance** and identifies budget submissions likely to require **Executive Rework**.</p>
+                {% elif module.url == 'predictive_analytics:customer_insight' %}
+                    <p>Utilizes **Survival Analysis** and **Regression** to predict client behavior, such as **RSA PIN migration/churn rates** and modeling the impact of different **fee structures** on overall AUM growth.</p>
+                {% endif %}
+            </a>
+        </div>
+        {% endfor %}
+        
+        <div class="col-md-4">
+            <div class="module-card" style="opacity: 0.5; cursor: not-allowed;">
+                <i class="fas fa-chart-area" style="color: #6c757d;"></i>
+                <h4>Model Training & Governance</h4>
+                <p>Future module: Manage data pipelines, version control ML models, and audit prediction accuracy for compliance and robustness.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -109,7 +109,6 @@
         background-color: #dee2e6;
         color: #343a40;
     }
-    
     /* Icon Colors based on the image */
     .icon-green { color: #28a745; }
     .icon-upload { color: var(--teal-accent); }
@@ -117,11 +116,14 @@
     .icon-clipboard { color: #17a2b8; }
     .icon-chart { color: #007bff; }
     .icon-settings { color: #6c757d; } /* New color for Setup */
+    .icon-predict { color: #6f42c1; } /* NEW color for Predictive Analytics */
 
     /* Fix to override base.html background */
     .auth-container {
         min-height: auto;
     }
+    /* Icon Colors based on the image */
+    
 </style>
 {% endblock %}
 
@@ -157,7 +159,7 @@
     <p class="mb-5" style="color: #6c757d;">Select a module below to manage your budgeting and performance data</p>
 
     <div class="row g-4">
-        {# First Row: Core Data Management and Planning #}
+        {# Row 1: Core Data and Planning #}
         <div class="col-md-4">
             <a href="{% url 'data_management:historical_data' %}" class="text-decoration-none d-block h-100">
                 <div class="module-card">
@@ -197,14 +199,27 @@
             </a>
         </div>
         
-        {# Second Row: Configuration, Forecasting, and Analysis #}
+        {# Row 2: Analytics, Prediction, and Forecasting #}
         <div class="col-md-4">
-            <a href="{% url 'setup:setup_index' %}" class="text-decoration-none d-block h-100">
+            <a href="{% url 'analysis:analysis_dashboard' %}" class="text-decoration-none d-block h-100">
                 <div class="module-card">
                     <div>
-                        <i class="fas fa-cogs icon-settings"></i>
-                        <h4>Setup</h4>
-                        <p>Manage all core configuration and master data records</p>
+                        <i class="fas fa-chart-bar icon-clipboard"></i>
+                        <h4>Analysis</h4>
+                        <p>Performance analysis and reporting (Budget vs Actual)</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'predictive_analytics:analytics_index' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-robot icon-predict"></i>
+                        <h4>Predictive Analytics</h4>
+                        <p>ML-powered forecasts, risk scoring, and customer insight.</p>
                     </div>
                     <button class="btn btn-module-access">Access Module</button>
                 </div>
@@ -217,23 +232,27 @@
                     <div>
                         <i class="fas fa-chart-line icon-chart"></i>
                         <h4>Forecast</h4>
-                        <p>Scenario simulation and forward-looking financial statements</p>
+                        <p>Scenario simulation and forward-looking financial statements.</p>
                     </div>
                     <button class="btn btn-module-access">Access Module</button>
                 </div>
             </a>
         </div>
-
+        
+        {# Row 3: Setup #}
         <div class="col-md-4">
-            <div class="module-card">
-                <div>
-                    <i class="fas fa-chart-bar icon-clipboard"></i>
-                    <h4>Analysis</h4>
-                    <p>Performance analysis and reporting (Budget vs Actual)</p>
+            <a href="{% url 'setup:setup_index' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-cogs icon-settings"></i>
+                        <h4>Setup</h4>
+                        <p>Manage all core configuration and master data records</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
                 </div>
-                <button class="btn btn-module-access disabled" disabled>Access Module</button>
-            </div>
+            </a>
         </div>
+        
     </div>
 </div>
 {% endblock %}
