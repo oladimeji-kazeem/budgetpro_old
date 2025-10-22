@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+import calendar # ADDED for month name calculation
 
 
 # Define choices based on the GL structure
@@ -83,16 +84,62 @@ class ManagedFund(models.Model):
 
 class DateDetail(models.Model):
     date = models.DateField(unique=True)
-    month = models.PositiveSmallIntegerField(editable=False)
-    quarter = models.PositiveSmallIntegerField(editable=False)
-    half_year = models.PositiveSmallIntegerField(editable=False)
-    year = models.PositiveSmallIntegerField(editable=False)
+    
+    # NEW Fields for richer date dimension - TEMPORARILY set to null=True/blank=True for migration safety
+    date_key = models.IntegerField(null=True, blank=True, editable=False, db_index=True) # YYYYMMDD
+    year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    quarter = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    month = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    month_name = models.CharField(max_length=10, null=True, blank=True, editable=False)
+    month_short = models.CharField(max_length=3, null=True, blank=True, editable=False)
+    day = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    day_of_week = models.PositiveSmallIntegerField(null=True, blank=True, editable=False) # 1=Monday, 7=Sunday
+    day_name = models.CharField(max_length=10, null=True, blank=True, editable=False)
+    week_of_year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    is_weekend = models.BooleanField(default=False, editable=False) # Keep default=False
+    year_month = models.CharField(max_length=7, null=True, blank=True, editable=False) # YYYY-MM
+    year_quarter = models.CharField(max_length=7, null=True, blank=True, editable=False) # YYYY QX
+    half_year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
+    
+    # Fiscal and Calendar Naming
+    fiscal_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # FYYYYY
+    calendar_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # CYYYYY
+    quarter_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # QX-YYYY
+    month_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # MX-YYYY
+
 
     def save(self, *args, **kwargs):
-        self.month = self.date.month
-        self.year = self.date.year
-        self.quarter = (self.date.month - 1) // 3 + 1
-        self.half_year = 1 if self.date.month <= 6 else 2
+        # Calculate fields based on the date
+        d = self.date
+        
+        self.date_key = int(d.strftime('%Y%m%d'))
+        self.year = d.year
+        self.quarter = (d.month - 1) // 3 + 1
+        self.month = d.month
+        self.month_name = calendar.month_name[d.month]
+        self.month_short = calendar.month_abbr[d.month]
+        self.day = d.day
+        
+        # Python's weekday: Monday is 0 and Sunday is 6. We map to Monday=1, Sunday=7.
+        self.day_of_week = d.weekday() + 1 
+        self.day_name = calendar.day_name[d.weekday()]
+        
+        # ISO week number
+        self.week_of_year = d.isocalendar()[1]
+        
+        # Weekend check (Saturday=6, Sunday=7 in our system)
+        self.is_weekend = self.day_of_week in [6, 7] 
+        
+        self.year_month = d.strftime('%Y-%m')
+        self.year_quarter = f"{d.year} Q{self.quarter}"
+        self.half_year = 1 if d.month <= 6 else 2
+        
+        # Fiscal and Calendar Naming (assuming fiscal year = calendar year for simplicity)
+        self.fiscal_year = f"FY{d.year}"
+        self.calendar_year = f"CY{d.year}"
+        self.quarter_year = f"Q{self.quarter}-{d.year}"
+        self.month_year = f"M{d.month}-{d.year}"
+        
         super().save(*args, **kwargs)
 
     class Meta:
@@ -101,48 +148,8 @@ class DateDetail(models.Model):
         ordering = ['date']
 
     def __str__(self):
-        return f"{self.date.strftime('%Y-%m-%d')} (Q{self.quarter}, H{self.half_year})"
+        return f"{self.date.strftime('%Y-%m-%d')} ({self.quarter_year})"
     
-
-# ... (existing imports and other models like RSAFund, State, etc.)
-
-
-
-class GLAccount(models.Model):
-    gl_account_code = models.CharField(max_length=15, unique=True, verbose_name="GL Account Code")
-    gl_account_name = models.CharField(max_length=200, verbose_name="GL Account Name")
-    category = models.CharField(max_length=50, verbose_name="Category")
-    sub_category = models.CharField(max_length=50, blank=True, null=True, verbose_name="Sub-Category")
-    financial_statement = models.CharField(max_length=50, choices=STATEMENT_CHOICES, verbose_name="Financial Statement")
-    account_type = models.CharField(max_length=50, verbose_name="Account Type")
-    is_postable = models.BooleanField(default=True, verbose_name="Is Postable")
-    parent_account = models.ForeignKey(
-        'self', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='children',
-        limit_choices_to={'is_postable': False}, # Only non-postable (Header) accounts can be parents
-        verbose_name="Parent Account"
-    )
-    normal_balance = models.CharField(max_length=10, choices=BALANCE_CHOICES, verbose_name="Normal Balance")
-    active_flag = models.BooleanField(default=True, verbose_name="Active")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "GL Account"
-        verbose_name_plural = "GL Accounts"
-        ordering = ['gl_account_code']
-
-    def __str__(self):
-        return f"{self.gl_account_code} - {self.gl_account_name}"
-
-# ... (existing other models)
-
-
-# ... (Existing models: RSAFund, State, Location, Region, ManagedFund, DateDetail, GLAccount)
 
 # Note: The original GLAccount model does not have the table name 'gl_chart_of_accounts',
 # but the model name is 'GLAccount', which Django automatically uses for relationship.
@@ -316,3 +323,34 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
+        
+class GLAccount(models.Model):
+    gl_account_code = models.CharField(max_length=15, unique=True, verbose_name="GL Account Code")
+    gl_account_name = models.CharField(max_length=200, verbose_name="GL Account Name")
+    category = models.CharField(max_length=50, verbose_name="Category")
+    sub_category = models.CharField(max_length=50, blank=True, null=True, verbose_name="Sub-Category")
+    financial_statement = models.CharField(max_length=50, choices=STATEMENT_CHOICES, verbose_name="Financial Statement")
+    account_type = models.CharField(max_length=50, verbose_name="Account Type")
+    is_postable = models.BooleanField(default=True, verbose_name="Is Postable")
+    parent_account = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='children',
+        limit_choices_to={'is_postable': False}, # Only non-postable (Header) accounts can be parents
+        verbose_name="Parent Account"
+    )
+    normal_balance = models.CharField(max_length=10, choices=BALANCE_CHOICES, verbose_name="Normal Balance")
+    active_flag = models.BooleanField(default=True, verbose_name="Active")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "GL Account"
+        verbose_name_plural = "GL Accounts"
+        ordering = ['gl_account_code']
+
+    def __str__(self):
+        return f"{self.gl_account_code} - {self.gl_account_name}"

@@ -7,9 +7,7 @@
 {% block setup_content %}
 <div class="d-flex justify-content-between mb-3">
     <p class="text-muted">List of all configured logical Regions.</p>
-    <a href="{% url 'setup:region_create' %}" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus-circle"></i> Add New Region
-    </a>
+    {# Button moved to bottom #}
 </div>
 
 <div class="setup-card p-0">
@@ -56,5 +54,11 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+    <a href="{% url 'setup:region_create' %}" class="btn btn-primary custom-add-btn">
+        <i class="fas fa-plus-circle me-2"></i> Add New Region
+    </a>
 </div>
 {% endblock %}

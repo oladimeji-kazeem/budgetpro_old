@@ -49,6 +49,40 @@
     .table {
         background: var(--white);
     }
+    /* --- NEW/ENHANCED STYLES FOR FORM AESTHETICS --- */
+    .form-card-large {
+        padding: 40px !important; /* Larger padding for better form appearance */
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* More prominent shadow for forms */
+    }
+    .form-control, .custom-select {
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+    /* Ensure the crispy submit button looks good */
+    .btn-primary {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover {
+        background-color: var(--secondary-dark);
+        border-color: var(--secondary-dark);
+        transform: translateY(-1px);
+    }
+    /* Style for the relocated "Add New" button (REDUCED SIZE) */
+    .custom-add-btn {
+        background-color: var(--teal-accent);
+        border-color: var(--teal-accent);
+        font-weight: 600;
+        padding: 8px 16px; /* Reduced padding for smaller button */
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    .custom-add-btn:hover {
+        background-color: #318a84;
+        border-color: #318a84;
+    }
 </style>
 {% endblock %}
 

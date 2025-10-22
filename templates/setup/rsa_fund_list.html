@@ -5,11 +5,22 @@
 {% endblock %}
 
 {% block setup_content %}
-<div class="d-flex justify-content-between mb-3">
-    <p class="text-muted">List of all configured RSA Funds.</p>
-    <a href="{% url 'setup:rsafund_create' %}" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus-circle"></i> Add New RSA Fund
-    </a>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <p class="text-muted">List of all configured RSA Funds.</p>
+    </div>
+    <div class="btn-group" role="group" aria-label="Import Actions">
+        {# Download Template Button (Outline style) #}
+        <a href="{% url 'data_management:download_template' template_type='rsa_fund_setup' %}" 
+           class="btn btn-outline-success custom-add-btn me-2" 
+           style="border-color: #28a745; color: #28a745; background-color: #e9f8f7;">
+            <i class="fas fa-file-excel me-2"></i> Download Template
+        </a>
+        {# Go to Import Page Button (Primary action) #}
+        <a href="{% url 'data_management:historical_data' %}" class="btn btn-primary custom-add-btn">
+            <i class="fas fa-cloud-upload-alt me-2"></i> Go to Import Page
+        </a>
+    </div>
 </div>
 
 <div class="setup-card p-0">
@@ -46,5 +57,11 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+    <a href="{% url 'setup:rsafund_create' %}" class="btn btn-primary custom-add-btn">
+        <i class="fas fa-plus-circle me-2"></i> Add New RSA Fund
+    </a>
 </div>
 {% endblock %}

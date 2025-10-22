@@ -240,6 +240,20 @@
         </div>
         
         {# Row 3: Setup #}
+
+        <div class="col-md-4">
+            <a href="{% url 'setup:department_list' %}" class="text-decoration-none d-block h-100">
+                <div class="module-card">
+                    <div>
+                        <i class="fas fa-building icon-settings" style="color: #ffc107;"></i>
+                        <h4>Departments</h4>
+                        <p>Manage internal departments and their heads.</p>
+                    </div>
+                    <button class="btn btn-module-access">Access Module</button>
+                </div>
+            </a>
+        </div>
+
         <div class="col-md-4">
             <a href="{% url 'setup:setup_index' %}" class="text-decoration-none d-block h-100">
                 <div class="module-card">

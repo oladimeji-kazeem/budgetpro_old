@@ -88,10 +88,23 @@ WSGI_APPLICATION = "zynbudget.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+#DATABASES = {
+    #"default": {
+        #"ENGINE": "django.db.backends.sqlite3",
+        #"NAME": BASE_DIR / "db.sqlite3",
+    #}
+#}
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql", # CHANGED from sqlite3
+        "NAME": "budgetpro_db",                   # Use your database name
+        "USER": "dimeji",                # Use your database user
+        "PASSWORD": "Labake2025",       # Use your secure password
+        "HOST": "localhost",                     # Or the IP/hostname of your PostgreSQL server
+        "PORT": "5432",                          # Default PostgreSQL port
     }
 }
 

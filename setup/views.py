@@ -35,6 +35,7 @@ class BaseSetupView(LoginRequiredMixin):
     # Success URL is determined by the specific model's list view name
     def get_success_url(self):
         model_name = self.model.__name__.lower()
+        # FIX: Explicitly add the 'setup' namespace to the reverse lookup
         return reverse_lazy(f'setup:{model_name}_list')
     
     def get_context_data(self, **kwargs):
