@@ -85,27 +85,27 @@ class ManagedFund(models.Model):
 class DateDetail(models.Model):
     date = models.DateField(unique=True)
     
-    # NEW Fields for richer date dimension - TEMPORARILY set to null=True/blank=True for migration safety
+    # Fields updated/added per request
     date_key = models.IntegerField(null=True, blank=True, editable=False, db_index=True) # YYYYMMDD
     year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
     quarter = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
     month = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
-    month_name = models.CharField(max_length=10, null=True, blank=True, editable=False)
+    month_name = models.CharField(max_length=10, null=True, blank=True, editable=False, verbose_name="MonthName") # Renamed/set verbose_name to MonthName
     month_short = models.CharField(max_length=3, null=True, blank=True, editable=False)
     day = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
     day_of_week = models.PositiveSmallIntegerField(null=True, blank=True, editable=False) # 1=Monday, 7=Sunday
-    day_name = models.CharField(max_length=10, null=True, blank=True, editable=False)
+    day_name = models.CharField(max_length=10, null=True, blank=True, editable=False, verbose_name="DayName") # Renamed/set verbose_name to DayName
     week_of_year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
     is_weekend = models.BooleanField(default=False, editable=False) # Keep default=False
     year_month = models.CharField(max_length=7, null=True, blank=True, editable=False) # YYYY-MM
     year_quarter = models.CharField(max_length=7, null=True, blank=True, editable=False) # YYYY QX
     half_year = models.PositiveSmallIntegerField(null=True, blank=True, editable=False)
     
-    # Fiscal and Calendar Naming
-    fiscal_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # FYYYYY
-    calendar_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # CYYYYY
-    quarter_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # QX-YYYY
-    month_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # MX-YYYY
+    # Fiscal and Calendar Naming - Added fields (1, 2, 3, 4)
+    fiscal_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # 1. FYYYYY
+    calendar_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # 2. CYYYYY
+    quarter_name = models.CharField(max_length=10, null=True, blank=True, editable=False, verbose_name="QtrName") # 3. QX-YYYY (Qtr/Name -> QtrName)
+    month_year = models.CharField(max_length=10, null=True, blank=True, editable=False) # 4. MX-YYYY
 
 
     def save(self, *args, **kwargs):
@@ -134,11 +134,11 @@ class DateDetail(models.Model):
         self.year_quarter = f"{d.year} Q{self.quarter}"
         self.half_year = 1 if d.month <= 6 else 2
         
-        # Fiscal and Calendar Naming (assuming fiscal year = calendar year for simplicity)
-        self.fiscal_year = f"FY{d.year}"
-        self.calendar_year = f"CY{d.year}"
-        self.quarter_year = f"Q{self.quarter}-{d.year}"
-        self.month_year = f"M{d.month}-{d.year}"
+        # Calculate Fiscal and Calendar Naming (assuming fiscal year = calendar year for simplicity)
+        self.fiscal_year = f"FY{d.year}" # 1. FYYYYY
+        self.calendar_year = f"CY{d.year}" # 2. CYYYYY
+        self.quarter_name = f"Q{self.quarter}-{d.year}" # 3. QX-YYYY (QtrName)
+        self.month_year = f"M{d.month}-{d.year}" # 4. MX-YYYY
         
         super().save(*args, **kwargs)
 
@@ -148,7 +148,7 @@ class DateDetail(models.Model):
         ordering = ['date']
 
     def __str__(self):
-        return f"{self.date.strftime('%Y-%m-%d')} ({self.quarter_year})"
+        return f"{self.date.strftime('%Y-%m-%d')} ({self.quarter_name})"
     
 
 # Note: The original GLAccount model does not have the table name 'gl_chart_of_accounts',
